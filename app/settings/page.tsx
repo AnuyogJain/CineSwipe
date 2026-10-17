@@ -78,8 +78,32 @@ export default function SettingsPage() {
     }
   };
 
-  const downloadServerBackup = () => {
-    window.location.href = "/api/backup/download";
+  const downloadServerBackup = async () => {
+    setBackupBusy(true);
+    setBackupMessage(null);
+    try {
+      const res = await fetch("/api/backup/download");
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        throw new Error(data.error ?? "Download failed");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "cineswipe-backup-server.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+      setBackupMessage("Server backup downloaded.");
+    } catch (err) {
+      setBackupMessage(
+        err instanceof Error ? err.message : "Could not download backup",
+      );
+    } finally {
+      setBackupBusy(false);
+    }
   };
 
   const useTemporaryKeys = async () => {
