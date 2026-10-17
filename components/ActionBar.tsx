@@ -1,3 +1,5 @@
+import { Eye, Heart, iconActionClass, Star, X } from "@/components/icons";
+
 interface ActionBarProps {
   onPass: () => void;
   onLike: () => void;
@@ -8,7 +10,7 @@ interface ActionBarProps {
 }
 
 const sideButtonClass =
-  "flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-xl ring-1 transition hover:scale-105 disabled:opacity-40";
+  "flex h-12 w-12 items-center justify-center rounded-full bg-white/5 ring-1 transition hover:scale-105 disabled:opacity-40";
 
 export function ActionBar({
   onPass,
@@ -27,7 +29,7 @@ export function ActionBar({
         aria-label="Add to wishlist"
         className={`${sideButtonClass} text-amber-300 ring-amber-300/40 hover:bg-amber-400/10`}
       >
-        ★
+        <Star className={iconActionClass} strokeWidth={2} aria-hidden />
       </button>
       <div className="flex items-center gap-5">
         <button
@@ -37,16 +39,21 @@ export function ActionBar({
           aria-label="Pass"
           className={`${sideButtonClass} text-rose-400 ring-rose-400/30 hover:bg-rose-500/10`}
         >
-          ✕
+          <X className={iconActionClass} strokeWidth={2.5} aria-hidden />
         </button>
         <button
           type="button"
           disabled={disabled}
           onClick={onLike}
           aria-label="Like"
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-2xl text-white shadow-lg shadow-rose-500/30 transition hover:scale-105 disabled:opacity-40"
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-500/30 transition hover:scale-105 disabled:opacity-40"
         >
-          ♥
+          <Heart
+            className="h-7 w-7 shrink-0"
+            strokeWidth={2}
+            fill="currentColor"
+            aria-hidden
+          />
         </button>
       </div>
       <button
@@ -61,7 +68,7 @@ export function ActionBar({
             : "text-sky-300 ring-sky-400/40 hover:bg-sky-400/10"
         }`}
       >
-        👁
+        <Eye className={iconActionClass} strokeWidth={2} aria-hidden />
       </button>
     </div>
   );

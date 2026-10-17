@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import type { MovieCandidate } from "@/lib/types";
+import { Star } from "@/components/icons";
 import { ImdbRatingBadge } from "./ImdbRatingBadge";
 
 interface MovieGridProps {
@@ -103,9 +104,10 @@ export function MovieGrid({
                   event.stopPropagation();
                   onWishlist?.(movie.tmdbId);
                 }}
-                className="w-full border-t border-white/5 px-3 py-2 text-xs font-medium text-amber-300 hover:bg-amber-400/10"
+                className="flex w-full items-center justify-center gap-1.5 border-t border-white/5 px-3 py-2 text-xs font-medium text-amber-300 hover:bg-amber-400/10"
               >
-                ★ Move to Wishlist
+                <Star className="h-3.5 w-3.5 shrink-0" strokeWidth={2} aria-hidden />
+                Move to Wishlist
               </button>
             ) : null}
           </article>

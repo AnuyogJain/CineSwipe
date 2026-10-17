@@ -17,3 +17,5 @@ Local data (SQLite DB and stored keys) lives in `./data/` (gitignored).
 - `npm run build` — production build
 - `npm run start` — run production build
 - `npm run lint` — ESLint
+
+UI icons use [Lucide](https://lucide.dev) (ISC license) via `lucide-react`.

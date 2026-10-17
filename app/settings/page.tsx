@@ -21,11 +21,6 @@ export default function SettingsPage() {
   } | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [castQuery, setCastQuery] = useState("");
-  const [castResults, setCastResults] = useState<
-    Array<{ id: number; name: string; profilePath: string | null }>
-  >([]);
-
   useEffect(() => {
     fetch("/api/settings")
       .then((r) => r.json())
@@ -65,20 +60,6 @@ export default function SettingsPage() {
       setSaving(false);
     }
   };
-
-  useEffect(() => {
-    if (castQuery.length < 2) {
-      setCastResults([]);
-      return;
-    }
-    const timer = setTimeout(() => {
-      fetch(`/api/search/cast?q=${encodeURIComponent(castQuery)}`)
-        .then((r) => r.json())
-        .then((d) => setCastResults(d.results ?? []))
-        .catch(() => setCastResults([]));
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [castQuery]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-4 pb-8">
@@ -186,28 +167,6 @@ export default function SettingsPage() {
         {message ? <p className="text-sm text-emerald-300">{message}</p> : null}
       </section>
 
-      <section className="app-panel space-y-3 rounded-2xl p-4">
-        <h3 className="font-semibold">Explore by cast</h3>
-        <input
-          type="search"
-          value={castQuery}
-          onChange={(e) => setCastQuery(e.target.value)}
-          placeholder="Search actor name…"
-          className="app-input w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-violet-400/30"
-        />
-        <ul className="space-y-1">
-          {castResults.map((person) => (
-            <li key={person.id}>
-              <Link
-                href={`/?castId=${person.id}&castName=${encodeURIComponent(person.name)}`}
-                className="block rounded-lg px-2 py-2 text-sm hover:bg-white/5"
-              >
-                {person.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   );
 }

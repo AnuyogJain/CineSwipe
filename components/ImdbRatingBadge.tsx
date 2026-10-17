@@ -1,4 +1,4 @@
-import type { MovieCandidate } from "@/lib/types";
+import { ExternalLink, Star } from "@/components/icons";
 import { imdbTitleUrl } from "@/lib/imdb-url";
 
 interface ImdbRatingBadgeProps {
@@ -28,7 +28,7 @@ export function ImdbRatingBadge({
   compact = false,
 }: ImdbRatingBadgeProps) {
   const textSize = size === "lg" ? "text-sm" : "text-xs";
-  const starSize = size === "lg" ? "text-base" : "text-sm";
+  const starClass = size === "lg" ? "h-4 w-4" : "h-3.5 w-3.5";
   const href = imdbTitleUrl(imdbId);
   const votesLabel = votes ? formatVotesShort(votes) : null;
 
@@ -42,7 +42,12 @@ export function ImdbRatingBadge({
           : ""
       }`}
     >
-      <span className={`shrink-0 ${starSize} text-imdb-yellow`}>★</span>
+      <Star
+        className={`shrink-0 ${starClass} text-imdb-yellow`}
+        strokeWidth={2}
+        fill="currentColor"
+        aria-hidden
+      />
       <span className="shrink-0 text-white/90">IMDb</span>
       <span className="shrink-0 font-semibold tabular-nums text-white">
         {rating != null ? rating.toFixed(1) : "N/A"}
@@ -56,9 +61,11 @@ export function ImdbRatingBadge({
         </span>
       ) : null}
       {href ? (
-        <span className="shrink-0 text-white/40" aria-hidden>
-          ↗
-        </span>
+        <ExternalLink
+          className="h-3 w-3 shrink-0 text-white/40"
+          strokeWidth={2}
+          aria-hidden
+        />
       ) : null}
     </span>
   );
@@ -85,5 +92,3 @@ export function ImdbRatingBadge({
     </div>
   );
 }
-
-export type { MovieCandidate };

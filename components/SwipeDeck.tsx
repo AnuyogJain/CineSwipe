@@ -1,13 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { normalizeGenreName } from "@/lib/genres";
-import { ORIGIN_LANGUAGES } from "@/lib/languages";
+import type { ListFilters } from "@/lib/list-filters";
 import type { MovieCandidate } from "@/lib/types";
+import { CastSearchField } from "./CastSearchField";
+import { GlobeNavLink } from "./GlobeNavLink";
+import { ListFilterMenu } from "./ListFilterMenu";
 import { MovieCard } from "./MovieCard";
-import { MultiSelectDropdown } from "./MultiSelectDropdown";
 import {
   fetchWithTimeout,
   isLikelyApiKeyError,
@@ -18,6 +26,24 @@ import { LoadingProgress } from "./LoadingProgress";
 
 const RECOMMENDATIONS_CLIENT_TIMEOUT_MS = 55_000;
 
+function DiscoverDeckShell({
+  toolbar,
+  overlay,
+  children,
+}: {
+  toolbar?: ReactNode;
+  overlay?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-3 pb-2 pt-2">
+      {overlay}
+      {toolbar}
+      {children}
+    </div>
+  );
+}
+
 interface SwipeDeckProps {
   initialGenre?: string;
   initialCast?: { id: number; name: string } | null;
@@ -25,8 +51,10 @@ interface SwipeDeckProps {
   initialCountry?: string;
   /** Display name when country is locked (e.g. "Poland") */
   countryLabel?: string;
-  /** Keep country filter fixed and hide origin language picker */
+  /** Keep country filter fixed (globe country discover panel) */
   lockCountries?: boolean;
+  /** Show link to globe tab (off when already in globe country discover) */
+  showGlobeNavLink?: boolean;
 }
 
 export function SwipeDeck({
@@ -35,6 +63,7 @@ export function SwipeDeck({
   initialCountry,
   countryLabel,
   lockCountries = false,
+  showGlobeNavLink = true,
 }: SwipeDeckProps) {
   const [movies, setMovies] = useState<MovieCandidate[]>([]);
   const [index, setIndex] = useState(0);
@@ -51,9 +80,6 @@ export function SwipeDeck({
   const [busy, setBusy] = useState(false);
   const [watchedIds, setWatchedIds] = useState<Set<number>>(() => new Set());
   const [topGenres, setTopGenres] = useState<string[]>([]);
-  const [allGenres, setAllGenres] = useState<
-    Array<{ name: string; id: number }>
-  >([]);
   const [deckPage, setDeckPage] = useState(1);
   const [setup, setSetup] = useState<{
     keysReady: boolean;
@@ -75,11 +101,6 @@ export function SwipeDeck({
         });
         setTopGenres(data.topGenres ?? []);
       })
-      .catch(() => null);
-
-    fetch("/api/genres")
-      .then((r) => r.json())
-      .then((data) => setAllGenres(data.genres ?? []))
       .catch(() => null);
   }, []);
 
@@ -147,7 +168,7 @@ export function SwipeDeck({
         const res = await fetchWithTimeout(
           `/api/recommendations?${params.toString()}`,
           undefined,
-          RECOMMENDATIONS_CLIENT_TIMEOUT_MS,
+          RECOMMENDATIONS_CLIENT_TIMEOUT_MS
         );
         const data = await res.json();
 
@@ -189,7 +210,7 @@ export function SwipeDeck({
         // Weak batch while swiping — pull another Discover window in the same chain.
         const bestMatch = fresh.reduce(
           (max, m) => Math.max(max, m.matchScore ?? 0),
-          0,
+          0
         );
         if (
           append &&
@@ -211,8 +232,8 @@ export function SwipeDeck({
             err instanceof TimeoutError
               ? "Loading took too long. Check your API keys in Settings or tap Retry."
               : err instanceof Error
-                ? err.message
-                : "Failed to load movies";
+              ? err.message
+              : "Failed to load movies";
           setError(message);
           setMovies([]);
         }
@@ -223,7 +244,7 @@ export function SwipeDeck({
         }
       }
     },
-    [genreFilters, originFilters, countryFilters, castFilter],
+    [genreFilters, originFilters, countryFilters, castFilter]
   );
 
   useEffect(() => {
@@ -266,14 +287,13 @@ export function SwipeDeck({
     setCastFilter(null);
   };
 
-  const onGenreFiltersChange = (next: string[]) => {
+  const onDiscoverFiltersChange = (next: ListFilters) => {
     setCastFilter(null);
-    setGenreFilters(next);
-  };
-
-  const onOriginFiltersChange = (next: string[]) => {
-    setCastFilter(null);
-    setOriginFilters(next);
+    setGenreFilters(next.genres);
+    setOriginFilters(next.languages);
+    if (!lockCountries) {
+      setCountryFilters(next.countries);
+    }
   };
 
   const refreshDeck = () => {
@@ -282,24 +302,6 @@ export function SwipeDeck({
   };
 
   const current = movies[index];
-
-  const genreOptions = useMemo(
-    () =>
-      allGenres.map((genre) => ({
-        value: genre.name,
-        label: genre.name,
-        highlight: topGenres.some(
-          (g) =>
-            normalizeGenreName(g).toLowerCase() === genre.name.toLowerCase()
-        ),
-      })),
-    [allGenres, topGenres]
-  );
-
-  const originOptions = useMemo(
-    () => ORIGIN_LANGUAGES.map((l) => ({ value: l.code, label: l.label })),
-    []
-  );
 
   const recordSwipe = async (
     action: "pass" | "like" | "wishlist",
@@ -363,19 +365,22 @@ export function SwipeDeck({
 
   useEffect(() => {
     const tmdbId = current?.tmdbId;
-    if (!tmdbId || watchedIds.has(tmdbId)) return;
+    if (!tmdbId) return;
     let cancelled = false;
     void fetch(`/api/movies/${tmdbId}`)
       .then((r) => r.json())
       .then((data: { inWatchedLibrary?: boolean }) => {
         if (cancelled || !data.inWatchedLibrary) return;
-        setWatchedIds((prev) => new Set(prev).add(tmdbId));
+        setWatchedIds((prev) => {
+          if (prev.has(tmdbId)) return prev;
+          return new Set(prev).add(tmdbId);
+        });
       })
       .catch(() => null);
     return () => {
       cancelled = true;
     };
-  }, [current?.tmdbId, watchedIds]);
+  }, [current?.tmdbId]);
 
   const handleWatched = async () => {
     if (!current || busy || watchedIds.has(current.tmdbId)) return;
@@ -391,17 +396,56 @@ export function SwipeDeck({
     advance();
   };
 
+  const discoverToolbar =
+    setup?.keysReady && setup?.hasProfile ? (
+      <div className="relative z-30 flex shrink-0 items-start gap-2">
+        <CastSearchField
+          selected={castFilter}
+          onSelect={applyCastFilter}
+          onClear={() => setCastFilter(null)}
+          disabled={busy || loading}
+        />
+        <div className="ml-auto flex shrink-0 items-start gap-2">
+          <ListFilterMenu
+            filters={{
+              genres: genreFilters,
+              languages: originFilters,
+              countries: countryFilters,
+            }}
+            onChange={onDiscoverFiltersChange}
+            highlightGenres={topGenres}
+            lockCountries={lockCountries}
+            countryLabel={
+              lockCountries ? countryLabel ?? countryFilters[0] ?? null : null
+            }
+            disabled={busy || loading || Boolean(castFilter)}
+            dropdownAlign="right"
+            showTasteHint={topGenres.length > 0 && !castFilter}
+          />
+          {showGlobeNavLink ? <GlobeNavLink source="recommend" /> : null}
+        </div>
+      </div>
+    ) : null;
+
   if (!setup || (loading && movies.length === 0)) {
+    const label =
+      hasFilters || lockCountries
+        ? "Applying filters & loading picks…"
+        : "Finding movies matched to your taste…";
+
+    if (setup?.keysReady && setup?.hasProfile) {
+      return (
+        <DiscoverDeckShell toolbar={discoverToolbar}>
+          <div className="flex flex-1 items-center justify-center p-8">
+            <LoadingProgress active label={label} />
+          </div>
+        </DiscoverDeckShell>
+      );
+    }
+
     return (
       <div className="flex flex-1 items-center justify-center p-8">
-        <LoadingProgress
-          active
-          label={
-            hasFilters || lockCountries
-              ? "Applying filters & loading picks…"
-              : "Finding movies matched to your taste…"
-          }
-        />
+        <LoadingProgress active label={label} />
       </div>
     );
   }
@@ -441,140 +485,90 @@ export function SwipeDeck({
   if (error && movies.length === 0) {
     const showSettings = isLikelyApiKeyError(error);
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-        <p className="text-lg font-semibold text-white">Couldn&apos;t load picks</p>
-        <p className="max-w-sm text-sm text-white/70">{error}</p>
-        <div className="flex flex-wrap justify-center gap-2">
-          {showSettings ? (
-            <Link
-              href="/settings"
-              className="rounded-full bg-rose-500 px-4 py-2 text-sm font-medium text-white hover:bg-rose-600"
-            >
-              Open Settings
-            </Link>
-          ) : null}
-          {hasFilters && (
+      <DiscoverDeckShell toolbar={discoverToolbar}>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+          <p className="text-lg font-semibold text-white">
+            Couldn&apos;t load picks
+          </p>
+          <p className="max-w-sm text-sm text-white/70">{error}</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {showSettings ? (
+              <Link
+                href="/settings"
+                className="rounded-full bg-rose-500 px-4 py-2 text-sm font-medium text-white hover:bg-rose-600"
+              >
+                Open Settings
+              </Link>
+            ) : null}
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="rounded-full bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15"
+              >
+                Clear filters
+              </button>
+            )}
             <button
               type="button"
-              onClick={clearFilters}
+              onClick={refreshDeck}
               className="rounded-full bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15"
             >
-              Clear filters
+              Retry
             </button>
-          )}
-          <button
-            type="button"
-            onClick={refreshDeck}
-            className="rounded-full bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15"
-          >
-            Retry
-          </button>
+          </div>
         </div>
-      </div>
+      </DiscoverDeckShell>
     );
   }
 
   if (!current) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-        <p className="text-white/70">No more picks in this batch.</p>
-        <p className="max-w-xs text-sm text-white/45">
-          {lockCountries
-            ? `Load more recommendations from ${
-                countryLabel ?? "this country"
-              }, or go back to the map.`
-            : "Load the next page of recommendations, or clear filters to browse all tastes."}
-        </p>
-        <div className="flex flex-wrap justify-center gap-2">
-          {hasFilters && (
+      <DiscoverDeckShell toolbar={discoverToolbar}>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+          <p className="text-white/70">No more picks in this batch.</p>
+          <p className="max-w-xs text-sm text-white/45">
+            {lockCountries
+              ? `Load more recommendations from ${
+                  countryLabel ?? "this country"
+                }, or go back to the map.`
+              : "Load the next page of recommendations, or clear filters to browse all tastes."}
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="rounded-full bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15"
+              >
+                Clear filters
+              </button>
+            )}
             <button
               type="button"
-              onClick={clearFilters}
-              className="rounded-full bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15"
+              onClick={refreshDeck}
+              disabled={loading}
+              className="rounded-full bg-rose-500 px-4 py-2 text-sm font-medium text-white hover:bg-rose-600 disabled:opacity-50"
             >
-              Clear filters
+              {loading ? "Loading…" : "Refresh deck"}
             </button>
-          )}
-          <button
-            type="button"
-            onClick={refreshDeck}
-            disabled={loading}
-            className="rounded-full bg-rose-500 px-4 py-2 text-sm font-medium text-white hover:bg-rose-600 disabled:opacity-50"
-          >
-            {loading ? "Loading…" : "Refresh deck"}
-          </button>
+          </div>
         </div>
-      </div>
+      </DiscoverDeckShell>
     );
   }
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-3 pb-2 pt-2">
-      {loading ? (
-        <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/50 backdrop-blur-sm">
-          <LoadingProgress active={loading} label="Updating picks…" compact />
-        </div>
-      ) : null}
-
-      {!castFilter ? (
-        <div className="relative z-30 shrink-0 space-y-1">
-          <div className="flex items-end gap-2">
-            <MultiSelectDropdown
-              label="Genre"
-              options={genreOptions}
-              selected={genreFilters}
-              onChange={onGenreFiltersChange}
-              placeholder="Any genre"
-              disabled={busy || loading}
-            />
-            {lockCountries ? (
-              <div className="min-w-0 flex-1">
-                <p className="mb-1 px-0.5 text-[10px] font-medium uppercase tracking-wider text-white/40">
-                  Country
-                </p>
-                <div className="rounded-xl bg-rose-500/15 px-3 py-2.5 text-sm font-medium text-rose-100 ring-1 ring-rose-400/30">
-                  {countryLabel ?? countryFilters.join(", ")}
-                </div>
-              </div>
-            ) : (
-              <MultiSelectDropdown
-                label="Origin"
-                options={originOptions}
-                selected={originFilters}
-                onChange={onOriginFiltersChange}
-                placeholder="Any language"
-                disabled={busy || loading}
-              />
-            )}
+    <DiscoverDeckShell
+      toolbar={discoverToolbar}
+      overlay={
+        loading ? (
+          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/50 backdrop-blur-sm">
+            <LoadingProgress active={loading} label="Updating picks…" compact />
           </div>
-          {topGenres.length > 0 ? (
-            <p className="px-0.5 text-[10px] text-white/30">
-              Amber genres match your taste profile
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {castFilter ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2 px-1">
-          {lockCountries ? (
-            <span className="rounded-full bg-rose-500/15 px-3 py-1 text-xs text-rose-200 ring-1 ring-rose-400/30">
-              {countryLabel ?? countryFilters.join(", ")}
-            </span>
-          ) : null}
-          <span className="rounded-full bg-violet-500/20 px-3 py-1 text-xs text-violet-200">
-            Cast: {castFilter.name}
-            <button
-              type="button"
-              className="ml-2 text-violet-100/70"
-              onClick={clearFilters}
-            >
-              ×
-            </button>
-          </span>
-        </div>
-      ) : null}
-
+        ) : null
+      }
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={`${current.tmdbId}-${genreFilters.join(
@@ -604,6 +598,6 @@ export function SwipeDeck({
           />
         </motion.div>
       </AnimatePresence>
-    </div>
+    </DiscoverDeckShell>
   );
 }

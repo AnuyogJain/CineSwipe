@@ -18,6 +18,7 @@ export default function WishlistPage() {
   const [filters, setFilters] = useState<ListFilters>({
     genres: [],
     languages: [],
+    countries: [],
   });
 
   const filteredMovies = useMemo(
@@ -85,7 +86,7 @@ export default function WishlistPage() {
         movies={filteredMovies}
         emptyMessage={
           movies.length === 0
-            ? "No wishlist items yet. Tap ★ while swiping or from Liked!"
+            ? "No wishlist items yet. Use the star button while swiping or from Liked!"
             : "No wishlist items match these filters."
         }
         showDeleteButton

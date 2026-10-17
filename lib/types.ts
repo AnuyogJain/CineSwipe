@@ -34,6 +34,7 @@ export interface MovieCandidate {
   releaseDate?: string | null;
   status?: string | null;
   countries?: string[];
+  countryCodes?: string[];
   cast: Array<{ id: number; name: string; character: string; profilePath: string | null }>;
 }
 

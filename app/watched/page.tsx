@@ -20,11 +20,14 @@ export default function WatchedPage() {
   const [filters, setFilters] = useState<ListFilters>({
     genres: [],
     languages: [],
+    countries: [],
   });
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const filtersActive =
-    filters.genres.length > 0 || filters.languages.length > 0;
+    filters.genres.length > 0 ||
+    filters.languages.length > 0 ||
+    filters.countries.length > 0;
 
   const loadPage = useCallback(async (pageNum: number) => {
     setLoading(true);
@@ -39,6 +42,9 @@ export default function WatchedPage() {
       if (filters.languages.length > 0) {
         params.set("languages", filters.languages.join(","));
       }
+      if (filters.countries.length > 0) {
+        params.set("countries", filters.countries.join(","));
+      }
       const res = await fetch(`/api/watched?${params.toString()}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -52,7 +58,7 @@ export default function WatchedPage() {
     } finally {
       setLoading(false);
     }
-  }, [filters.genres, filters.languages]);
+  }, [filters.genres, filters.languages, filters.countries]);
 
   useEffect(() => {
     void loadPage(1);

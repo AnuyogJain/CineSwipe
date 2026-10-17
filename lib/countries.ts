@@ -145,6 +145,13 @@ export function countryName(iso: string, fallback?: string): string {
   return COUNTRY_CENTROIDS[iso]?.name ?? fallback ?? iso;
 }
 
+/** Sorted ISO → label pairs for country filter dropdowns. */
+export function countryFilterOptions(): Array<{ code: string; label: string }> {
+  return Object.entries(COUNTRY_CENTROIDS)
+    .map(([code, { name }]) => ({ code, label: name }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
 export function getCentroid(iso: string): { lat: number; lng: number; name: string } | null {
   return COUNTRY_CENTROIDS[iso] ?? null;
 }

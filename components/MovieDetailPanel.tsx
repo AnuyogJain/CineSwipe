@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Eye, iconHeaderClass } from "@/components/icons";
 import { markMovieWatched } from "@/lib/mark-watched-client";
 import { motion, AnimatePresence } from "framer-motion";
 import type { GlobeMovieDetail } from "@/lib/globe-types";
@@ -418,13 +419,13 @@ export function MovieDetailPanel({
                                 : "In watched"
                               : "Mark watched"
                           }
-                          className={`globe-modal__icon-btn text-base ${
+                          className={`globe-modal__icon-btn ${
                             watchedActive
                               ? "bg-sky-500/15 text-sky-200 ring-1 ring-sky-400/35"
                               : "text-sky-300/90 ring-1 ring-sky-400/25"
                           }`}
                         >
-                          👁
+                          <Eye className={iconHeaderClass} strokeWidth={2} aria-hidden />
                         </button>
                       </div>
                       {detail.originalTitle &&

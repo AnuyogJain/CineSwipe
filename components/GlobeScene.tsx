@@ -45,7 +45,8 @@ function countryPillHtml(count: number, recommendMode: boolean): string {
   if (recommendMode) {
     return `<div style="width:14px;height:14px;border-radius:50%;background:#e11d48;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,0.08),0 2px 8px rgba(225,29,72,0.35);"></div>`;
   }
-  return `<div style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:#fff;border-radius:999px;box-shadow:0 4px 20px rgba(15,23,42,0.1);font-family:system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;color:#334155;white-space:nowrap;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#eff6ff;font-size:12px">🎬</span><span>${count}</span></div>`;
+  const filmIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/></svg>`;
+  return `<div style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:#fff;border-radius:999px;box-shadow:0 4px 20px rgba(15,23,42,0.1);font-family:system-ui,-apple-system,sans-serif;font-size:14px;font-weight:600;color:#334155;white-space:nowrap;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#eff6ff">${filmIcon}</span><span>${count}</span></div>`;
 }
 
 function createCountryPillElement(

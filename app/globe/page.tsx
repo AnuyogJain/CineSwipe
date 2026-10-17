@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { fetchWithTimeout, TimeoutError } from "@/lib/fetch-timeout";
+import { Globe } from "@/components/icons";
 import { LoadingProgress } from "@/components/LoadingProgress";
 
 const GLOBE_CLIENT_TIMEOUT_MS = 55_000;
@@ -148,7 +149,7 @@ export default function GlobePage() {
     const needsSettings = error.toLowerCase().includes("tmdb");
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-        <p className="text-4xl">🌍</p>
+        <Globe className="h-12 w-12 text-muted" strokeWidth={1.5} aria-hidden />
         <h2 className="text-xl font-bold">Globe unavailable</h2>
         <p className="text-sm text-muted">{error}</p>
         {needsSettings ? (
@@ -208,7 +209,7 @@ export default function GlobePage() {
 
         {isEmpty ? (
           <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-3 px-6 text-center">
-            <p className="text-4xl">🌍</p>
+            <Globe className="h-12 w-12 text-muted" strokeWidth={1.5} aria-hidden />
             <h2 className="text-xl font-bold">No {activeSource.label.toLowerCase()} movies</h2>
             <p className="max-w-sm text-sm text-muted">{activeSource.empty}</p>
             {source === "viewed" ? (

@@ -66,6 +66,7 @@ export function GlobeRecommendPanel({ country, onClose }: GlobeRecommendPanelPro
                 initialCountry={country.iso}
                 countryLabel={country.name}
                 lockCountries
+                showGlobeNavLink={false}
               />
             </div>
           </motion.div>

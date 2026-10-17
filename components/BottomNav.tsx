@@ -2,13 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
+import {
+  Clapperboard,
+  Eye,
+  Heart,
+  iconNavClass,
+  Settings,
+  Star,
+} from "@/components/icons";
 
-const links = [
-  { href: "/", label: "Discover", icon: "🎬" },
-  { href: "/liked", label: "Liked", icon: "♥" },
-  { href: "/wishlist", label: "Wishlist", icon: "★" },
-  { href: "/watched", label: "Watched", icon: "👁" },
-  { href: "/settings", label: "Settings", icon: "⚙️" },
+const links: Array<{ href: string; label: string; Icon: LucideIcon }> = [
+  { href: "/", label: "Discover", Icon: Clapperboard },
+  { href: "/liked", label: "Liked", Icon: Heart },
+  { href: "/wishlist", label: "Wishlist", Icon: Star },
+  { href: "/watched", label: "Watched", Icon: Eye },
+  { href: "/settings", label: "Settings", Icon: Settings },
 ];
 
 export function BottomNav() {
@@ -19,6 +28,7 @@ export function BottomNav() {
       <div className="mx-auto flex max-w-lg items-center justify-around px-1 py-2">
         {links.map((link) => {
           const active = pathname === link.href;
+          const { Icon } = link;
           return (
             <Link
               key={link.href}
@@ -27,7 +37,7 @@ export function BottomNav() {
                 active ? "app-nav__link--active" : ""
               }`}
             >
-              <span className="text-base">{link.icon}</span>
+              <Icon className={iconNavClass} strokeWidth={2} aria-hidden />
               {link.label}
             </Link>
           );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { Check, ChevronDown, ChevronUp } from "@/components/icons";
 
 export interface MultiSelectOption {
   value: string;
@@ -16,6 +17,8 @@ interface MultiSelectDropdownProps {
   onChange: (next: string[]) => void;
   placeholder?: string;
   disabled?: boolean;
+  /** Show selection styling but do not open the list (e.g. globe-locked country). */
+  readOnly?: boolean;
 }
 
 export function MultiSelectDropdown({
@@ -25,6 +28,7 @@ export function MultiSelectDropdown({
   onChange,
   placeholder = "Any",
   disabled,
+  readOnly = false,
 }: MultiSelectDropdownProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -71,22 +75,28 @@ export function MultiSelectDropdown({
       <button
         type="button"
         disabled={disabled}
-        aria-expanded={open}
-        aria-controls={listId}
-        onClick={() => setOpen((v) => !v)}
+        aria-expanded={readOnly ? undefined : open}
+        aria-controls={readOnly ? undefined : listId}
+        aria-readonly={readOnly || undefined}
+        onClick={() => {
+          if (disabled || readOnly) return;
+          setOpen((v) => !v);
+        }}
         className={`flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-sm ring-1 transition disabled:opacity-50 ${
           selected.length > 0
             ? "bg-rose-500/15 text-rose-50 ring-rose-400/40"
             : "bg-white/5 text-white/80 ring-white/10 hover:bg-white/10"
-        }`}
+        } ${readOnly ? "cursor-default" : ""}`}
       >
         <span className="truncate">{summary}</span>
-        <span className="shrink-0 text-white/45" aria-hidden>
-          {open ? "▴" : "▾"}
-        </span>
+        {readOnly ? null : open ? (
+          <ChevronUp className="h-4 w-4 shrink-0 text-white/45" aria-hidden />
+        ) : (
+          <ChevronDown className="h-4 w-4 shrink-0 text-white/45" aria-hidden />
+        )}
       </button>
 
-      {open ? (
+      {open && !readOnly ? (
         <div
           id={listId}
           role="listbox"
@@ -120,14 +130,16 @@ export function MultiSelectDropdown({
                 }`}
               >
                 <span
-                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
+                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
                     checked
                       ? "border-rose-400/60 bg-rose-500/40 text-white"
-                      : "border-white/25 bg-transparent text-transparent"
+                      : "border-white/25 bg-transparent"
                   }`}
                   aria-hidden
                 >
-                  ✓
+                  {checked ? (
+                    <Check className="h-3 w-3" strokeWidth={3} />
+                  ) : null}
                 </span>
                 <span className="truncate">{opt.label}</span>
                 {opt.highlight && !checked ? (

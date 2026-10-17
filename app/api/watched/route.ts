@@ -18,12 +18,19 @@ export async function GET(request: Request) {
         ?.split(",")
         .map((l) => l.trim().toLowerCase())
         .filter(Boolean) ?? [];
+    const countries =
+      searchParams
+        .get("countries")
+        ?.split(",")
+        .map((c) => c.trim().toUpperCase())
+        .filter(Boolean) ?? [];
 
     const result = await getWatchedMovies({
       page: Number.isFinite(page) && page > 0 ? page : 1,
       limit: Number.isFinite(limit) ? limit : 24,
       genres,
       languages,
+      countries,
     });
 
     return NextResponse.json(result);

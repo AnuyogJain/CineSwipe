@@ -3,7 +3,11 @@ import "server-only";
 import { and, desc, eq, inArray, or } from "drizzle-orm";
 import { db } from "./db";
 import { importedRatings, movieCache, swipeActions } from "./db/schema";
-import { importRowMatchesGenreFilter } from "./list-filters";
+import {
+  importRowMatchesGenreFilter,
+  normalizeCountryCodes,
+  rowMatchesCountryFilter,
+} from "./list-filters";
 import { getTasteProfile } from "./taste-profile";
 import {
   discoverMovies,
@@ -380,6 +384,7 @@ async function enrichCandidate(
       releaseDate: movie.releaseDate,
       status: movie.status,
       countries: movie.countries,
+      countryCodes: movie.countryCodes,
       cast: movie.cast,
     };
 
@@ -785,11 +790,39 @@ async function enrichWatchedRow(row: ImportedRating): Promise<MovieCandidate> {
       matchScore: 0,
       matchPercent: 0,
       director: movie.director,
+      countries: movie.countries,
+      countryCodes: movie.countryCodes,
       cast: movie.cast,
     };
   } catch {
     return fallback;
   }
+}
+
+async function loadCachedCountryCodes(
+  tmdbIds: number[],
+): Promise<Map<number, string[]>> {
+  const map = new Map<number, string[]>();
+  if (tmdbIds.length === 0) return map;
+
+  const chunkSize = 200;
+  for (let i = 0; i < tmdbIds.length; i += chunkSize) {
+    const chunk = tmdbIds.slice(i, i + chunkSize);
+    const cached = await db
+      .select()
+      .from(movieCache)
+      .where(inArray(movieCache.tmdbId, chunk));
+    for (const row of cached) {
+      try {
+        const parsed = JSON.parse(row.payload) as { countryCodes?: string[] };
+        const codes = normalizeCountryCodes(parsed.countryCodes ?? []);
+        if (codes.length > 0) map.set(row.tmdbId, codes);
+      } catch {
+        /* ignore bad cache payload */
+      }
+    }
+  }
+  return map;
 }
 
 async function loadCachedOriginalLanguages(
@@ -823,11 +856,13 @@ export async function getWatchedMovies(options?: {
   limit?: number;
   genres?: string[];
   languages?: string[];
+  countries?: string[];
 }): Promise<{ movies: MovieCandidate[]; total: number; nextPage: number | null }> {
   const page = Math.max(1, options?.page ?? 1);
   const limit = Math.min(Math.max(options?.limit ?? 24, 1), 48);
   const genreFilters = options?.genres ?? [];
   const languageFilters = (options?.languages ?? []).map((l) => l.toLowerCase());
+  const countryFilters = normalizeCountryCodes(options?.countries ?? []);
 
   const rows = await db.select().from(importedRatings);
   let eligible = rows
@@ -854,6 +889,20 @@ export async function getWatchedMovies(options?: {
       if (!row.tmdbId) return false;
       const lang = langByTmdb.get(row.tmdbId);
       return lang != null && languageFilters.includes(lang);
+    });
+  }
+
+  if (countryFilters.length > 0) {
+    const tmdbIds = eligible
+      .map((row) => row.tmdbId)
+      .filter((id): id is number => id != null);
+    const codesByTmdb = await loadCachedCountryCodes(tmdbIds);
+    eligible = eligible.filter((row) => {
+      if (!row.tmdbId) return false;
+      return rowMatchesCountryFilter(
+        codesByTmdb.get(row.tmdbId),
+        countryFilters,
+      );
     });
   }
 
@@ -938,6 +987,8 @@ export async function getListMovies(
         matchScore: row.matchScore ?? 0,
         matchPercent: toMatchPercent(row.matchScore ?? 0),
         director: movie.director,
+        countries: movie.countries,
+        countryCodes: movie.countryCodes,
         cast: movie.cast,
       });
     } catch {

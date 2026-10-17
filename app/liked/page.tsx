@@ -18,6 +18,7 @@ export default function LikedPage() {
   const [filters, setFilters] = useState<ListFilters>({
     genres: [],
     languages: [],
+    countries: [],
   });
 
   const filteredMovies = useMemo(
