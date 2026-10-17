@@ -1,0 +1,298 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { fetchWithTimeout, TimeoutError } from "@/lib/fetch-timeout";
+import { LoadingProgress } from "@/components/LoadingProgress";
+
+const GLOBE_CLIENT_TIMEOUT_MS = 55_000;
+import { GlobeMovieDetailPanel } from "@/components/GlobeMovieDetail";
+import { GlobeMovieList } from "@/components/GlobeMovieList";
+import { GlobeRecommendPanel } from "@/components/GlobeRecommendPanel";
+import {
+  parseGlobeSource,
+  type GlobeCountry,
+  type GlobeDataset,
+  type GlobeMovie,
+  type GlobeSource,
+} from "@/lib/globe-types";
+
+const GlobeScene = dynamic(
+  () => import("@/components/GlobeScene").then((m) => m.GlobeScene),
+  { ssr: false, loading: () => null },
+);
+
+const SOURCES: Array<{ id: GlobeSource; label: string; empty: string; hint: string }> = [
+  {
+    id: "viewed",
+    label: "Viewed",
+    empty: "Import your IMDb ratings to see them mapped on the globe.",
+    hint: "Your imported IMDb ratings",
+  },
+  {
+    id: "liked",
+    label: "Liked",
+    empty: "Swipe right on Discover to add liked movies here.",
+    hint: "Movies you liked while swiping",
+  },
+  {
+    id: "wishlist",
+    label: "Wishlist",
+    empty: "Super-like movies on Discover to pin them here.",
+    hint: "Your wishlist picks",
+  },
+  {
+    id: "recommend",
+    label: "Recommend",
+    empty: "Import ratings first so we can recommend by country.",
+    hint: "Tap a country to discover taste-matched movies",
+  },
+];
+
+export default function GlobePage() {
+  const [source, setSource] = useState<GlobeSource | null>(null);
+  const [data, setData] = useState<GlobeDataset | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<GlobeCountry | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<GlobeMovie | null>(null);
+
+  const isRecommend = source === "recommend";
+
+  const load = useCallback(async (nextSource: GlobeSource) => {
+    setLoading(true);
+    setError(null);
+    setSelectedCountry(null);
+    setSelectedMovie(null);
+    try {
+      const res = await fetchWithTimeout(
+        `/api/globe?source=${nextSource}`,
+        undefined,
+        GLOBE_CLIENT_TIMEOUT_MS,
+      );
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Failed to load globe");
+      setData(json as GlobeDataset);
+    } catch (err) {
+      setData(null);
+      setError(
+        err instanceof TimeoutError
+          ? "Loading took too long. Check your API keys in Settings or tap Retry."
+          : err instanceof Error
+            ? err.message
+            : "Failed to load globe",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const fromUrl = parseGlobeSource(
+      new URLSearchParams(window.location.search).get("source"),
+    );
+    setSource(fromUrl);
+  }, []);
+
+  useEffect(() => {
+    if (source == null) return;
+    void load(source);
+  }, [load, source]);
+
+  useEffect(() => {
+    const main = document.querySelector("main");
+    main?.classList.add("max-w-none!", "overflow-visible!", "p-0!");
+    return () => {
+      main?.classList.remove("max-w-none!", "overflow-visible!", "p-0!");
+    };
+  }, []);
+
+  const handleCountryClick = useCallback((country: GlobeCountry) => {
+    setSelectedMovie(null);
+    setSelectedCountry(country);
+  }, []);
+
+  const handleMovieClick = useCallback((movie: GlobeMovie) => {
+    setSelectedMovie(movie);
+  }, []);
+
+  const activeSource = SOURCES.find((s) => s.id === source) ?? SOURCES[0];
+
+  const sourceSwitcher = (
+    <div
+      className="globe-source-switcher pointer-events-auto"
+      role="tablist"
+      aria-label="Globe movie source"
+    >
+      {SOURCES.map((option) => {
+        const active = option.id === source;
+        return (
+          <button
+            key={option.id}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            disabled={loading && active}
+            onClick={() => setSource(option.id)}
+            className={`globe-source-switcher__btn${active ? " globe-source-switcher__btn--active" : ""}`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  if (error) {
+    const needsSettings = error.toLowerCase().includes("tmdb");
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="text-4xl">🌍</p>
+        <h2 className="text-xl font-bold">Globe unavailable</h2>
+        <p className="text-sm text-muted">{error}</p>
+        {needsSettings ? (
+          <Link
+            href="/settings"
+            className="rounded-xl bg-rose-500/20 px-4 py-2 text-sm font-medium text-rose-200 ring-1 ring-rose-400/30"
+          >
+            Open Settings
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              if (source) void load(source);
+            }}
+            className="rounded-xl bg-white/10 px-4 py-2 text-sm"
+          >
+            Retry
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  const isEmpty =
+    !loading && !isRecommend && (!data || data.stats.total === 0);
+
+  return (
+    <>
+      <div className="globe-sky fixed inset-0 bottom-14 top-[57px] z-0">
+        {loading ? (
+          <div className="absolute inset-0 z-[2] flex items-center justify-center">
+            <LoadingProgress
+              active
+              label={
+                isRecommend
+                  ? "Loading country discover map…"
+                  : source === "viewed"
+                    ? "Mapping your library to the world…"
+                    : source === "liked"
+                      ? "Mapping liked movies…"
+                      : "Mapping wishlist movies…"
+              }
+            />
+          </div>
+        ) : null}
+
+        {!loading && data && (isRecommend || data.stats.mapped > 0) ? (
+          <GlobeScene
+            countries={data.countries}
+            movies={data.movies}
+            recommendMode={isRecommend}
+            onCountryClick={handleCountryClick}
+            onMovieClick={handleMovieClick}
+          />
+        ) : null}
+
+        {isEmpty ? (
+          <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-3 px-6 text-center">
+            <p className="text-4xl">🌍</p>
+            <h2 className="text-xl font-bold">No {activeSource.label.toLowerCase()} movies</h2>
+            <p className="max-w-sm text-sm text-muted">{activeSource.empty}</p>
+            {source === "viewed" ? (
+              <Link
+                href="/import"
+                className="rounded-xl bg-rose-500/20 px-4 py-2 text-sm font-medium text-rose-200 ring-1 ring-rose-400/30"
+              >
+                Import CSV
+              </Link>
+            ) : (
+              <Link
+                href="/"
+                className="rounded-xl bg-rose-500/20 px-4 py-2 text-sm font-medium text-rose-200 ring-1 ring-rose-400/30"
+              >
+                Open Discover
+              </Link>
+            )}
+          </div>
+        ) : null}
+
+        <div className="pointer-events-none absolute left-0 right-0 top-3 z-10 flex flex-col items-center gap-2 px-4">
+          {sourceSwitcher}
+          <div className="globe-chrome__stats rounded-full border px-4 py-2 text-center text-xs shadow-lg backdrop-blur-sm">
+            {isRecommend ? (
+              <>
+                <span className="font-semibold text-rose-500">
+                  {data?.countries.length ?? 0}
+                </span>{" "}
+                countries · tap a pin to discover
+              </>
+            ) : data && data.stats.mapped > 0 ? (
+              <>
+                <span className="font-semibold text-rose-500">{data.stats.mapped}</span>{" "}
+                {activeSource.label.toLowerCase()} movies across{" "}
+                <span className="font-semibold text-amber-500">{data.countries.length}</span>{" "}
+                countries
+                {source === "viewed" && data.stats.excludedNonMovies > 0 ? (
+                  <span className="block text-[10px] opacity-70">
+                    {data.stats.excludedNonMovies} TV shows/episodes excluded
+                  </span>
+                ) : null}
+                {data.stats.unmapped > 0 ? (
+                  <span className="block text-[10px] opacity-70">
+                    {data.stats.unmapped} titles couldn&apos;t be placed
+                  </span>
+                ) : null}
+              </>
+            ) : (
+              activeSource.hint
+            )}
+          </div>
+        </div>
+
+        <p className="globe-chrome__hint pointer-events-none absolute bottom-3 left-0 right-0 z-10 text-center text-[10px]">
+          {isRecommend
+            ? "Tap a country pin to get recommendations from there"
+            : "Zoom in to see movies · Tap a dot for details · Tap a country to browse"}
+        </p>
+      </div>
+
+      {isRecommend ? (
+        <GlobeRecommendPanel
+          country={selectedCountry}
+          onClose={() => setSelectedCountry(null)}
+        />
+      ) : (
+        <GlobeMovieList
+          country={selectedCountry}
+          movies={data?.movies ?? []}
+          onClose={() => setSelectedCountry(null)}
+          onSelectMovie={(movie) => setSelectedMovie(movie)}
+        />
+      )}
+
+      {!isRecommend ? (
+        <GlobeMovieDetailPanel
+          movie={selectedMovie}
+          onClose={() => {
+            setSelectedMovie(null);
+            setSelectedCountry(null);
+          }}
+          onBack={() => setSelectedMovie(null)}
+        />
+      ) : null}
+    </>
+  );
+}
