@@ -338,7 +338,7 @@ body {
 }
 
 .home-row-scroll::-webkit-scrollbar {
-  height: 4px;
+  height: 0px;
 }
 
 .home-row-scroll::-webkit-scrollbar-thumb {
@@ -480,16 +480,14 @@ body {
 
 [data-theme="dark-amethyst"] .globe-sky::before {
   background:
-    linear-gradient(
-      105deg,
+    linear-gradient(105deg,
       transparent 0%,
       rgb(52 211 153 / 0.08) 18%,
       rgb(110 231 183 / 0.16) 32%,
       rgb(167 139 250 / 0.22) 48%,
       rgb(192 132 252 / 0.14) 62%,
       rgb(76 29 149 / 0.1) 78%,
-      transparent 100%
-    );
+      transparent 100%);
   filter: blur(18px);
   transform: scale(1.08);
   animation: globe-aurora 14s ease-in-out infinite;
@@ -505,6 +503,7 @@ body {
 }
 
 @keyframes globe-aurora {
+
   0%,
   100% {
     opacity: 0.72;
@@ -536,7 +535,7 @@ body {
 }
 
 /* globe.gl wraps each HTML marker — keep wrappers from trapping z-index */
-.globe-scene > div {
+.globe-scene>div {
   overflow: visible !important;
 }
 
@@ -783,12 +782,10 @@ body {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to top,
-    var(--globe-panel-bg) 0%,
-    color-mix(in srgb, var(--globe-panel-bg) 35%, transparent) 35%,
-    transparent 100%
-  );
+  background: linear-gradient(to top,
+      var(--globe-panel-bg) 0%,
+      color-mix(in srgb, var(--globe-panel-bg) 35%, transparent) 35%,
+      transparent 100%);
 }
 
 .globe-modal__nav {
@@ -975,4 +972,3 @@ body {
 .globe-list-panel .ring-white\/5 {
   --tw-ring-color: var(--ring);
 }
-

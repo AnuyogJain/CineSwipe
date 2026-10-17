@@ -70,9 +70,9 @@ export function MovieCard({
   const images = useMemo(
     () =>
       movieCarouselImages(
-        movie.images.length > 0 ? movie.images : ["/placeholder-poster.svg"],
+        movie.images.length > 0 ? movie.images : ["/placeholder-poster.svg"]
       ),
-    [movie.images],
+    [movie.images]
   );
   const currentImage = images[imageIndex % images.length];
 
@@ -83,7 +83,7 @@ export function MovieCard({
   return (
     <div className="theme-keep-dark relative mx-auto flex h-full w-full max-w-md flex-col overflow-hidden rounded-3xl bg-zinc-900 shadow-2xl ring-1 ring-white/10">
       {/* Only scroll container in the app */}
-      <div className="card-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <motion.div
           style={{ x, rotate }}
           drag={disabled ? false : "x"}

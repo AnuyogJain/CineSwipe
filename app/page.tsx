@@ -58,7 +58,7 @@ export default function HomePage() {
   }, [load]);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-4">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-4 scrollbar-hide">
       <div className="pt-3">
         <HomeDiscoverHero
           keysReady={setup.keysReady}

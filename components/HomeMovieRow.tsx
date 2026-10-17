@@ -45,7 +45,7 @@ export function HomeMovieRow({
       {preview.length === 0 ? (
         <p className="px-4 text-sm text-white/40">{emptyHint}</p>
       ) : (
-        <div className="home-row-scroll flex gap-3 overflow-x-auto px-4 pb-1 snap-x snap-mandatory">
+        <div className="scrollbar-hide flex gap-3 overflow-x-auto overflow-y-hidden px-4 pb-1 snap-x snap-mandatory">
           {preview.map((movie) => {
             const src = rowPoster(movie);
             return (

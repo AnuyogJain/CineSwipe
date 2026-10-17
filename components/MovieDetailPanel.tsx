@@ -2,7 +2,13 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { MovieListStateSelect } from "@/components/MovieListStateSelect";
 import {
   resolveMovieListState,
@@ -23,10 +29,7 @@ export interface MovieDetailPanelProps {
   headerContext?: string;
   /** Discover hides this; all other detail views show the list dropdown */
   showListStatePicker?: boolean;
-  onListStateChange?: (info: {
-    tmdbId: number;
-    state: MovieListState;
-  }) => void;
+  onListStateChange?: (info: { tmdbId: number; state: MovieListState }) => void;
 }
 
 function formatRuntime(minutes: number | null) {
@@ -139,7 +142,7 @@ function IconButton({
 
 function mergeListPayload(
   movie: MovieCandidate,
-  detail: GlobeMovieDetail,
+  detail: GlobeMovieDetail
 ): MovieCandidate {
   return {
     ...movie,
@@ -156,8 +159,7 @@ function mergeListPayload(
     genreIds: detail.genreIds,
     posterPath: detail.posterPath,
     backdropPath: detail.backdropPath,
-    images:
-      detail.images.length > 0 ? detail.images : movie.images,
+    images: detail.images.length > 0 ? detail.images : movie.images,
     director: detail.director,
     writers: detail.writers,
     countries: detail.countries,
@@ -172,9 +174,11 @@ function mergeListPayload(
   };
 }
 
-function applyListStateFlags(
-  state: MovieListState,
-): { inLiked: boolean; inWishlist: boolean; inWatched: boolean } {
+function applyListStateFlags(state: MovieListState): {
+  inLiked: boolean;
+  inWishlist: boolean;
+  inWatched: boolean;
+} {
   return {
     inLiked: state === "liked",
     inWishlist: state === "wishlist",
@@ -250,14 +254,14 @@ export function MovieDetailPanel({
                 inLiked: Boolean(data.inLiked),
                 inWishlist: Boolean(data.inWishlist),
                 inWatched: Boolean(data.inWatchedLibrary),
-              }),
+              })
           );
           setListState(
             resolveMovieListState({
               inLiked: flags.inLiked,
               inWishlist: flags.inWishlist,
               inWatched: flags.inWatched,
-            }),
+            })
           );
         }
       } catch (err) {
@@ -283,8 +287,8 @@ export function MovieDetailPanel({
       detail && detail.images.length > 0
         ? detail.images
         : detail?.posterPath
-          ? [posterUrl(detail.posterPath)!]
-          : ["/placeholder-poster.svg"];
+        ? [posterUrl(detail.posterPath)!]
+        : ["/placeholder-poster.svg"];
     return movieCarouselImages(raw);
   }, [detail]);
   const currentImage = images[imageIndex % images.length];
@@ -306,7 +310,7 @@ export function MovieDetailPanel({
       });
       router.push(`/discover?${params.toString()}`);
     },
-    [onClose, router],
+    [onClose, router]
   );
 
   const handleListStateChange = async (next: MovieListState) => {
@@ -318,7 +322,7 @@ export function MovieDetailPanel({
       const result = await setMovieListStateClient(
         movie.tmdbId,
         next,
-        mergeListPayload(movie, detail),
+        mergeListPayload(movie, detail)
       );
       if (!result.ok) {
         setListState(previous);
@@ -333,7 +337,7 @@ export function MovieDetailPanel({
               inWatchedLibrary: applied === "watched",
               yourRating: applied === "watched" ? prev.yourRating : null,
             }
-          : prev,
+          : prev
       );
       onListStateChange?.({ tmdbId: movie.tmdbId, state: applied });
     } finally {
@@ -393,7 +397,7 @@ export function MovieDetailPanel({
               </IconButton>
             </header>
 
-            <div className="globe-modal__body card-scroll">
+            <div className="globe-modal__body scrollbar-hide">
               {loading ? (
                 <DetailSkeleton />
               ) : error && !detail ? (
@@ -485,7 +489,9 @@ export function MovieDetailPanel({
                             value={listState}
                             busy={actionsBusy}
                             disabled={!movie.tmdbId}
-                            onChange={(next) => void handleListStateChange(next)}
+                            onChange={(next) =>
+                              void handleListStateChange(next)
+                            }
                           />
                         ) : null}
                       </div>
