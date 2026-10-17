@@ -29,31 +29,27 @@ const SOURCES: Array<{
   id: GlobeSource;
   label: string;
   empty: string;
-  hint: string;
 }> = [
   {
     id: "viewed",
     label: "Viewed",
-    empty: "Import your IMDb ratings to see them mapped on the globe.",
-    hint: "Your imported IMDb ratings",
+    empty:
+      "Mark movies as watched on Discover, or import ratings from Settings.",
   },
   {
     id: "liked",
     label: "Liked",
     empty: "Swipe right on Discover to add liked movies here.",
-    hint: "Movies you liked while swiping",
   },
   {
     id: "wishlist",
     label: "Wishlist",
     empty: "Super-like movies on Discover to pin them here.",
-    hint: "Your wishlist picks",
   },
   {
     id: "recommend",
     label: "Recommend",
-    empty: "Import ratings first so we can recommend by country.",
-    hint: "Tap a country to discover taste-matched movies",
+    empty: "Add API keys in Settings, then swipe on Discover to build taste.",
   },
 ];
 
@@ -190,6 +186,9 @@ export default function GlobePage() {
   }
 
   const isEmpty = !loading && !isRecommend && (!data || data.stats.total === 0);
+  const showStatsPill =
+    !loading &&
+    (isRecommend || Boolean(data && data.stats.mapped > 0));
 
   return (
     <>
@@ -223,21 +222,27 @@ export default function GlobePage() {
 
         {isEmpty ? (
           <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-3 px-6 text-center">
-            <Globe
-              className="h-12 w-12 text-muted"
-              strokeWidth={1.5}
-              aria-hidden
-            />
+            <Link
+              href="/settings"
+              className="rounded-full p-2 transition hover:bg-white/10"
+              aria-label="Open settings"
+            >
+              <Globe
+                className="h-12 w-12 text-muted"
+                strokeWidth={1.5}
+                aria-hidden
+              />
+            </Link>
             <h2 className="text-xl font-bold">
               No {activeSource.label.toLowerCase()} movies
             </h2>
             <p className="max-w-sm text-sm text-muted">{activeSource.empty}</p>
-            {source === "viewed" ? (
+            {source === "viewed" || source === "recommend" ? (
               <Link
-                href="/import"
+                href="/settings"
                 className="rounded-xl bg-rose-500/20 px-4 py-2 text-sm font-medium text-rose-200 ring-1 ring-rose-400/30"
               >
-                Import CSV
+                Open Settings
               </Link>
             ) : (
               <Link
@@ -252,39 +257,39 @@ export default function GlobePage() {
 
         <div className="pointer-events-none absolute left-0 right-0 top-3 z-10 flex flex-col items-center gap-2 px-4">
           {sourceSwitcher}
-          <div className="globe-chrome__stats rounded-full border px-4 py-2 text-center text-xs shadow-lg backdrop-blur-sm">
-            {isRecommend ? (
-              <>
-                <span className="font-semibold text-rose-500">
-                  {data?.countries.length ?? 0}
-                </span>{" "}
-                countries · tap a pin to discover
-              </>
-            ) : data && data.stats.mapped > 0 ? (
-              <>
-                <span className="font-semibold text-rose-500">
-                  {data.stats.mapped}
-                </span>{" "}
-                {activeSource.label.toLowerCase()} movies across{" "}
-                <span className="font-semibold text-amber-500">
-                  {data.countries.length}
-                </span>{" "}
-                countries
-                {source === "viewed" && data.stats.excludedNonMovies > 0 ? (
-                  <span className="block text-[10px] opacity-70">
-                    {data.stats.excludedNonMovies} TV shows/episodes excluded
-                  </span>
-                ) : null}
-                {data.stats.unmapped > 0 ? (
-                  <span className="block text-[10px] opacity-70">
-                    {data.stats.unmapped} titles couldn&apos;t be placed
-                  </span>
-                ) : null}
-              </>
-            ) : (
-              activeSource.hint
-            )}
-          </div>
+          {showStatsPill ? (
+            <div className="globe-chrome__stats rounded-full border px-4 py-2 text-center text-xs shadow-lg backdrop-blur-sm">
+              {isRecommend ? (
+                <>
+                  <span className="font-semibold text-rose-500">
+                    {data?.countries.length ?? 0}
+                  </span>{" "}
+                  countries · tap a pin to discover
+                </>
+              ) : data && data.stats.mapped > 0 ? (
+                <>
+                  <span className="font-semibold text-rose-500">
+                    {data.stats.mapped}
+                  </span>{" "}
+                  {activeSource.label.toLowerCase()} movies across{" "}
+                  <span className="font-semibold text-amber-500">
+                    {data.countries.length}
+                  </span>{" "}
+                  countries
+                  {source === "viewed" && data.stats.excludedNonMovies > 0 ? (
+                    <span className="block text-[10px] opacity-70">
+                      {data.stats.excludedNonMovies} TV shows/episodes excluded
+                    </span>
+                  ) : null}
+                  {data.stats.unmapped > 0 ? (
+                    <span className="block text-[10px] opacity-70">
+                      {data.stats.unmapped} titles couldn&apos;t be placed
+                    </span>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         <p className="globe-chrome__hint pointer-events-none absolute bottom-3 left-0 right-0 z-10 text-center text-[10px]">
