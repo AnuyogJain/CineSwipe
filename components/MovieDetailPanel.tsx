@@ -14,7 +14,6 @@ import { CastRow } from "./CastRow";
 export interface MovieDetailPanelProps {
   movie: MovieCandidate | null;
   onClose: () => void;
-  onBack?: () => void;
   /** Small label above title in header (e.g. country on globe) */
   headerContext?: string;
 }
@@ -130,7 +129,6 @@ function IconButton({
 export function MovieDetailPanel({
   movie,
   onClose,
-  onBack,
   headerContext,
 }: MovieDetailPanelProps) {
   const [detail, setDetail] = useState<GlobeMovieDetail | null>(null);
@@ -139,8 +137,6 @@ export function MovieDetailPanel({
   const [imageIndex, setImageIndex] = useState(0);
   const [watchedBusy, setWatchedBusy] = useState(false);
   const [inWatchedLibrary, setInWatchedLibrary] = useState(false);
-
-  const handleBack = onBack ?? onClose;
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -273,23 +269,7 @@ export function MovieDetailPanel({
             <div className="globe-modal__handle" aria-hidden="true" />
 
             <header className="globe-modal__header">
-              <IconButton label="Back" onClick={handleBack}>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M15 18l-6-6 6-6"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </IconButton>
+              <span className="h-9 w-9 shrink-0" aria-hidden="true" />
               <div className="min-w-0 flex-1 px-2 text-center">
                 <p className="truncate text-xs font-medium uppercase tracking-wider text-accent-text">
                   {contextLabel}

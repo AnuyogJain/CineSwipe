@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
@@ -49,14 +50,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-background text-foreground">
         <ThemeProvider>
-          <header className="app-header z-40 shrink-0 border-b px-4 py-3 backdrop-blur-xl">
-            <div className="mx-auto max-w-lg">
-              <h1 className="text-lg font-bold leading-none">
-                <span className="font-normal text-accent-text">Cine</span>
-                Swipe
-              </h1>
-            </div>
-          </header>
+          <AppHeader />
           <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-y-auto overflow-x-hidden">
             {children}
           </main>

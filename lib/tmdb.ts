@@ -312,6 +312,31 @@ export async function searchPerson(
   }));
 }
 
+export async function searchMovies(query: string): Promise<
+  Array<{
+    tmdbId: number;
+    title: string;
+    year: number;
+    posterPath: string | null;
+  }>
+> {
+  const data = await tmdbFetch<{
+    results: Array<{
+      id: number;
+      title: string;
+      release_date?: string;
+      poster_path: string | null;
+    }>;
+  }>("/search/movie", { query, include_adult: "false" });
+
+  return data.results.slice(0, 12).map((m) => ({
+    tmdbId: m.id,
+    title: m.title,
+    year: m.release_date ? Number(m.release_date.slice(0, 4)) : 0,
+    posterPath: m.poster_path,
+  }));
+}
+
 export async function getMoviesByPerson(personId: number): Promise<number[]> {
   const data = await tmdbFetch<{
     cast: Array<{ id: number; vote_average?: number; popularity?: number }>;

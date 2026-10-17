@@ -2,13 +2,13 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchWithTimeout, TimeoutError } from "@/lib/fetch-timeout";
 import { Globe } from "@/components/icons";
 import { LoadingProgress } from "@/components/LoadingProgress";
 
 const GLOBE_CLIENT_TIMEOUT_MS = 55_000;
-import { GlobeMovieDetailPanel } from "@/components/GlobeMovieDetail";
+import { MovieDetailPanel } from "@/components/MovieDetailPanel";
 import { GlobeMovieList } from "@/components/GlobeMovieList";
 import { GlobeRecommendPanel } from "@/components/GlobeRecommendPanel";
 import {
@@ -18,6 +18,7 @@ import {
   type GlobeMovie,
   type GlobeSource,
 } from "@/lib/globe-types";
+import { stubMovieCandidateFromGlobe } from "@/lib/stub-movie-candidate";
 
 const GlobeScene = dynamic(
   () => import("@/components/GlobeScene").then((m) => m.GlobeScene),
@@ -119,6 +120,12 @@ export default function GlobePage() {
   }, []);
 
   const activeSource = SOURCES.find((s) => s.id === source) ?? SOURCES[0];
+
+  const selectedGlobeCandidate = useMemo(
+    () =>
+      selectedMovie ? stubMovieCandidateFromGlobe(selectedMovie) : null,
+    [selectedMovie],
+  );
 
   const sourceSwitcher = (
     <div
@@ -285,13 +292,10 @@ export default function GlobePage() {
       )}
 
       {!isRecommend ? (
-        <GlobeMovieDetailPanel
-          movie={selectedMovie}
-          onClose={() => {
-            setSelectedMovie(null);
-            setSelectedCountry(null);
-          }}
-          onBack={() => setSelectedMovie(null)}
+        <MovieDetailPanel
+          movie={selectedGlobeCandidate}
+          headerContext={selectedMovie?.countryName}
+          onClose={() => setSelectedMovie(null)}
         />
       ) : null}
     </>

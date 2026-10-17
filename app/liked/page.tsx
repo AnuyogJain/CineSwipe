@@ -64,7 +64,6 @@ export default function LikedPage() {
     });
     if (res.ok) {
       setMovies((prev) => prev.filter((m) => m.tmdbId !== tmdbId));
-      setMessage("Moved to wishlist!");
       setTimeout(() => setMessage(null), 2000);
     }
   };
