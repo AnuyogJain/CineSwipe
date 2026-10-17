@@ -12,7 +12,6 @@ import {
 import {
   applyTheme,
   getStoredThemeSelection,
-  getSystemPrefersDark,
   persistThemeSelection,
   resolveThemeId,
   type ThemeId,
@@ -32,22 +31,15 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 /** SSR-safe defaults — must match server HTML until client hydration completes. */
 const SSR_THEME_SELECTION: ThemeSelection = "system";
-const SSR_PREFERS_DARK = true;
-
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [selection, setSelectionState] =
     useState<ThemeSelection>(SSR_THEME_SELECTION);
-  const [prefersDark, setPrefersDark] = useState(SSR_PREFERS_DARK);
   const [hydrated, setHydrated] = useState(false);
 
-  const resolvedId = useMemo(
-    () => resolveThemeId(selection, prefersDark),
-    [selection, prefersDark],
-  );
+  const resolvedId = useMemo(() => resolveThemeId(selection), [selection]);
 
   useEffect(() => {
     setSelectionState(getStoredThemeSelection());
-    setPrefersDark(getSystemPrefersDark());
     setHydrated(true);
   }, []);
 
@@ -55,16 +47,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyTheme(selection, resolvedId);
     if (hydrated) persistThemeSelection(selection);
   }, [selection, resolvedId, hydrated]);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = (event: MediaQueryListEvent) => {
-      setPrefersDark(event.matches);
-    };
-
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
-  }, []);
 
   const setSelection = useCallback((next: ThemeSelection) => {
     setSelectionState(next);

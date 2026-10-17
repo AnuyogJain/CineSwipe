@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getWatchedMovies, markMovieAsWatched } from "@/lib/recommender";
+import {
+  getWatchedMovies,
+  markMovieAsWatched,
+  removeFromWatched,
+} from "@/lib/recommender";
 
 const markWatchedSchema = z.object({
   tmdbId: z.number().int().positive(),
@@ -54,6 +58,29 @@ export async function POST(request: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to mark as watched";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const json = await request.json();
+    const parsed = markWatchedSchema.safeParse(json);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    }
+
+    const ok = await removeFromWatched(parsed.data.tmdbId);
+    if (!ok) {
+      return NextResponse.json(
+        { error: "Movie not found in watched library" },
+        { status: 404 },
+      );
+    }
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to remove from watched";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

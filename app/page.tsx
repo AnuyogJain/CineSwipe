@@ -1,39 +1,101 @@
 "use client";
 
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { SwipeDeck } from "@/components/SwipeDeck";
-
-function DiscoverContent() {
-  const searchParams = useSearchParams();
-  const castId = searchParams.get("castId");
-  const castName = searchParams.get("castName");
-
-  const initialCast =
-    castId && castName
-      ? { id: Number(castId), name: castName }
-      : null;
-
-  return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <SwipeDeck
-        initialGenre={searchParams.get("genre") ?? undefined}
-        initialCast={Number.isFinite(initialCast?.id) ? initialCast : null}
-      />
-    </div>
-  );
-}
+import { useCallback, useEffect, useState } from "react";
+import { HomeDiscoverHero } from "@/components/HomeDiscoverHero";
+import { HomeMovieRow } from "@/components/HomeMovieRow";
+import { MovieDetailPanel } from "@/components/MovieDetailPanel";
+import type { MovieCandidate } from "@/lib/types";
 
 export default function HomePage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex flex-1 items-center justify-center text-white/50">
-          Loading…
-        </div>
+  const [liked, setLiked] = useState<MovieCandidate[]>([]);
+  const [wishlist, setWishlist] = useState<MovieCandidate[]>([]);
+  const [watched, setWatched] = useState<MovieCandidate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<MovieCandidate | null>(null);
+  const [setup, setSetup] = useState<{
+    keysReady: boolean;
+    hasProfile: boolean;
+    topGenres: string[];
+  }>({ keysReady: false, hasProfile: false, topGenres: [] });
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [statusRes, likedRes, wishlistRes, watchedRes] = await Promise.all([
+        fetch("/api/status"),
+        fetch("/api/liked"),
+        fetch("/api/wishlist"),
+        fetch("/api/watched?limit=24&page=1"),
+      ]);
+
+      const status = await statusRes.json();
+      if (statusRes.ok) {
+        setSetup({
+          keysReady: Boolean(status.keysReady),
+          hasProfile: Boolean(status.hasProfile),
+          topGenres: status.topGenres ?? [],
+        });
       }
-    >
-      <DiscoverContent />
-    </Suspense>
+
+      const likedJson = await likedRes.json();
+      const wishlistJson = await wishlistRes.json();
+      const watchedJson = await watchedRes.json();
+
+      setLiked(likedRes.ok ? likedJson.movies ?? [] : []);
+      setWishlist(wishlistRes.ok ? wishlistJson.movies ?? [] : []);
+      setWatched(watchedRes.ok ? watchedJson.movies ?? [] : []);
+    } catch {
+      setLiked([]);
+      setWishlist([]);
+      setWatched([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-4">
+      <div className="pt-3">
+        <HomeDiscoverHero
+          keysReady={setup.keysReady}
+          hasProfile={setup.hasProfile}
+          topGenres={setup.topGenres}
+        />
+      </div>
+
+      {loading ? (
+        <p className="mt-6 px-4 text-sm text-white/45">Loading your lists…</p>
+      ) : (
+        <div className="mt-6">
+          <HomeMovieRow
+            title="Liked"
+            viewAllHref="/liked"
+            movies={liked}
+            emptyHint="Nothing liked yet — open Discover and swipe right on a match."
+            onSelectMovie={setSelected}
+          />
+          <HomeMovieRow
+            title="Wishlist"
+            viewAllHref="/wishlist"
+            movies={wishlist}
+            emptyHint="Save must-watch titles with a super-like on Discover."
+            onSelectMovie={setSelected}
+          />
+          <HomeMovieRow
+            title="Watched"
+            viewAllHref="/watched"
+            movies={watched}
+            emptyHint="Import IMDb ratings or mark movies watched from Discover."
+            onSelectMovie={setSelected}
+          />
+        </div>
+      )}
+
+      <MovieDetailPanel movie={selected} onClose={() => setSelected(null)} />
+    </div>
   );
 }

@@ -29,36 +29,39 @@ export default function WatchedPage() {
     filters.languages.length > 0 ||
     filters.countries.length > 0;
 
-  const loadPage = useCallback(async (pageNum: number) => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: String(pageNum),
-        limit: String(PAGE_SIZE),
-      });
-      if (filters.genres.length > 0) {
-        params.set("genres", filters.genres.join(","));
-      }
-      if (filters.languages.length > 0) {
-        params.set("languages", filters.languages.join(","));
-      }
-      if (filters.countries.length > 0) {
-        params.set("countries", filters.countries.join(","));
-      }
-      const res = await fetch(`/api/watched?${params.toString()}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+  const loadPage = useCallback(
+    async (pageNum: number) => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: String(pageNum),
+          limit: String(PAGE_SIZE),
+        });
+        if (filters.genres.length > 0) {
+          params.set("genres", filters.genres.join(","));
+        }
+        if (filters.languages.length > 0) {
+          params.set("languages", filters.languages.join(","));
+        }
+        if (filters.countries.length > 0) {
+          params.set("countries", filters.countries.join(","));
+        }
+        const res = await fetch(`/api/watched?${params.toString()}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
 
-      setMovies((data.movies ?? []) as MovieCandidate[]);
-      setTotal(data.total ?? 0);
-      setPage(pageNum);
-    } catch {
-      setMovies([]);
-      setTotal(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters.genres, filters.languages, filters.countries]);
+        setMovies((data.movies ?? []) as MovieCandidate[]);
+        setTotal(data.total ?? 0);
+        setPage(pageNum);
+      } catch {
+        setMovies([]);
+        setTotal(0);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filters.genres, filters.languages, filters.countries]
+  );
 
   useEffect(() => {
     void loadPage(1);
@@ -67,6 +70,19 @@ export default function WatchedPage() {
   const handleFiltersChange = (next: ListFilters) => {
     setSelected(null);
     setFilters(next);
+  };
+
+  const handleRemove = async (tmdbId: number) => {
+    const res = await fetch("/api/watched", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tmdbId }),
+    });
+    if (!res.ok) return;
+
+    setMovies((prev) => prev.filter((m) => m.tmdbId !== tmdbId));
+    setTotal((prev) => Math.max(0, prev - 1));
+    if (selected?.tmdbId === tmdbId) setSelected(null);
   };
 
   const goToPage = (next: number) => {
@@ -94,16 +110,11 @@ export default function WatchedPage() {
             {total > 0
               ? filtersActive
                 ? `${total} matching titles`
-                : `${total} titles from your IMDb import`
+                : `${total} titles`
               : filtersActive
-                ? "No titles match these filters"
-                : "Movies you rated on IMDb"}
+              ? "No titles match these filters"
+              : "Movies you rated on IMDb"}
           </p>
-          {total > 0 ? (
-            <p className="mt-1 text-xs text-white/35">
-              Page {page} of {totalPages}
-            </p>
-          ) : null}
         </div>
         <ListPageActions
           globeSource="viewed"
@@ -115,7 +126,9 @@ export default function WatchedPage() {
       {movies.length === 0 && !loading ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
           {filtersActive ? (
-            <p className="text-white/50">No watched titles match these filters.</p>
+            <p className="text-white/50">
+              No watched titles match these filters.
+            </p>
           ) : (
             <>
               <p className="text-white/50">
@@ -139,6 +152,8 @@ export default function WatchedPage() {
             <MovieGrid
               movies={movies}
               emptyMessage=""
+              showDeleteButton
+              onDelete={handleRemove}
               onSelectMovie={setSelected}
             />
           </div>

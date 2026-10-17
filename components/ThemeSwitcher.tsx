@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  DARK_THEMES,
-  LIGHT_THEMES,
-  THEMES,
-  type ThemeId,
-} from "@/lib/theme";
+import { DARK_THEMES, THEMES, type ThemeId } from "@/lib/theme";
 import { useTheme } from "./ThemeProvider";
 
 export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
@@ -19,7 +14,7 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
         <div>
           <h3 className="font-semibold text-foreground">Appearance</h3>
           <p className="mt-1 text-sm text-muted">
-            Six curated palettes — three light and three dark, each with a default.
+            Three dark palettes — pick one or follow system (defaults to Midnight).
             {hydrated && usingSystem
               ? ` Following device (${resolved.label}).`
               : null}
@@ -37,23 +32,15 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
         <span className="theme-system-toggle__hint">
           {hydrated && usingSystem
             ? `Active · ${resolved.label}`
-            : "Matches light/dark on your device"}
+            : "Uses Midnight when following system"}
         </span>
       </button>
 
       <ThemeGroup
-        title="Dark themes"
+        title="Themes"
         themes={DARK_THEMES}
         activeId={usingSystem ? null : selection}
-        resolvedId={resolved.family === "dark" ? resolvedId : null}
-        onSelect={setThemeId}
-      />
-
-      <ThemeGroup
-        title="Light themes"
-        themes={LIGHT_THEMES}
-        activeId={usingSystem ? null : selection}
-        resolvedId={resolved.family === "light" ? resolvedId : null}
+        resolvedId={resolvedId}
         onSelect={setThemeId}
       />
     </div>

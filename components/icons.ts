@@ -1,6 +1,7 @@
 export {
   Check,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   Clapperboard,
   ExternalLink,
@@ -8,6 +9,7 @@ export {
   Film,
   Globe,
   Heart,
+  Home,
   Search,
   Settings,
   SlidersHorizontal,

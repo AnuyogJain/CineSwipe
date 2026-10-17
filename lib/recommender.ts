@@ -8,7 +8,7 @@ import {
   normalizeCountryCodes,
   rowMatchesCountryFilter,
 } from "./list-filters";
-import { getTasteProfile } from "./taste-profile";
+import { getTasteProfile, rebuildTasteProfile } from "./taste-profile";
 import {
   discoverMovies,
   findTmdbIdByImdbId,
@@ -1104,6 +1104,23 @@ export async function isMovieInWatchedLibrary(
     .limit(1);
 
   return rows.length > 0;
+}
+
+export async function removeFromWatched(tmdbId: number): Promise<boolean> {
+  const rows = await db
+    .select({ imdbId: importedRatings.imdbId })
+    .from(importedRatings)
+    .where(eq(importedRatings.tmdbId, tmdbId))
+    .limit(1);
+
+  if (rows.length === 0) return false;
+
+  await db
+    .delete(importedRatings)
+    .where(eq(importedRatings.imdbId, rows[0]!.imdbId));
+
+  await rebuildTasteProfile();
+  return true;
 }
 
 export async function markMovieAsWatched(

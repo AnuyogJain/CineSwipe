@@ -7,13 +7,15 @@ import {
   Clapperboard,
   Eye,
   Heart,
+  Home,
   iconNavClass,
   Settings,
   Star,
 } from "@/components/icons";
 
 const links: Array<{ href: string; label: string; Icon: LucideIcon }> = [
-  { href: "/", label: "Discover", Icon: Clapperboard },
+  { href: "/", label: "Home", Icon: Home },
+  { href: "/discover", label: "Discover", Icon: Clapperboard },
   { href: "/liked", label: "Liked", Icon: Heart },
   { href: "/wishlist", label: "Wishlist", Icon: Star },
   { href: "/watched", label: "Watched", Icon: Eye },
@@ -27,7 +29,10 @@ export function BottomNav() {
     <nav className="app-nav z-50 shrink-0 border-t backdrop-blur-xl">
       <div className="mx-auto flex max-w-lg items-center justify-around px-1 py-2">
         {links.map((link) => {
-          const active = pathname === link.href;
+          const active =
+            link.href === "/discover"
+              ? pathname === "/discover"
+              : pathname === link.href;
           const { Icon } = link;
           return (
             <Link
