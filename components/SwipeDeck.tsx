@@ -89,6 +89,8 @@ export function SwipeDeck({
   const seenIdsRef = useRef<Set<number>>(new Set());
   const loadingMoreRef = useRef(false);
   const requestIdRef = useRef(0);
+  /** Prevents double-submit on the same card before React re-renders. */
+  const swipeLockTmdbRef = useRef<number | null>(null);
 
   useEffect(() => {
     fetch("/api/status")
@@ -303,36 +305,6 @@ export function SwipeDeck({
 
   const current = movies[index];
 
-  const recordSwipe = async (
-    action: "pass" | "like" | "wishlist",
-    movie: MovieCandidate
-  ) => {
-    setBusy(true);
-    try {
-      await fetch("/api/swipe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action,
-          movie: {
-            tmdbId: movie.tmdbId,
-            imdbId: movie.imdbId,
-            title: movie.title,
-            matchScore: movie.matchScore,
-            genres: movie.genres,
-            director: movie.director,
-            cast: movie.cast,
-            year: movie.year,
-            runtime: movie.runtime,
-          },
-          fullPayload: movie,
-        }),
-      });
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const advance = () => {
     const nextIndex = index + 1;
     setIndex(nextIndex);
@@ -345,29 +317,70 @@ export function SwipeDeck({
     }
   };
 
-  const handlePass = async () => {
-    if (!current || busy) return;
-    await recordSwipe("pass", current);
-    advance();
+  const recordSwipe = (
+    action: "pass" | "like" | "wishlist",
+    movie: MovieCandidate
+  ) => {
+    void fetch("/api/swipe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action,
+        movie: {
+          tmdbId: movie.tmdbId,
+          imdbId: movie.imdbId,
+          title: movie.title,
+          matchScore: movie.matchScore,
+          genres: movie.genres,
+          director: movie.director,
+          cast: movie.cast,
+          year: movie.year,
+          runtime: movie.runtime,
+        },
+        fullPayload: movie,
+      }),
+    }).catch(() => null);
   };
 
-  const handleLike = async () => {
-    if (!current || busy) return;
-    await recordSwipe("like", current);
+  const commitSwipe = (
+    action: "pass" | "like" | "wishlist",
+    movie: MovieCandidate
+  ) => {
+    if (swipeLockTmdbRef.current === movie.tmdbId) return;
+    swipeLockTmdbRef.current = movie.tmdbId;
     advance();
+    recordSwipe(action, movie);
   };
 
-  const handleWishlist = async () => {
-    if (!current || busy) return;
-    await recordSwipe("wishlist", current);
-    advance();
+  useEffect(() => {
+    swipeLockTmdbRef.current = null;
+  }, [current?.tmdbId]);
+
+  const handlePass = () => {
+    if (!current || busy || loading) return;
+    commitSwipe("pass", current);
+  };
+
+  const handleLike = () => {
+    if (!current || busy || loading) return;
+    commitSwipe("like", current);
+  };
+
+  const handleWishlist = () => {
+    if (!current || busy || loading) return;
+    commitSwipe("wishlist", current);
   };
 
   useEffect(() => {
     const tmdbId = current?.tmdbId;
     if (!tmdbId) return;
     let cancelled = false;
-    void fetch(`/api/movies/${tmdbId}`)
+    const params = new URLSearchParams();
+    if (current.imdbId) params.set("imdbId", current.imdbId);
+    const qs = params.toString();
+    void fetch(
+      `/api/movies/${tmdbId}/library${qs ? `?${qs}` : ""}`,
+    )
       .then((r) => r.json())
       .then((data: { inWatchedLibrary?: boolean }) => {
         if (cancelled || !data.inWatchedLibrary) return;
@@ -380,7 +393,7 @@ export function SwipeDeck({
     return () => {
       cancelled = true;
     };
-  }, [current?.tmdbId]);
+  }, [current?.tmdbId, current?.imdbId]);
 
   const handleWatched = async () => {
     if (!current || busy || watchedIds.has(current.tmdbId)) return;
