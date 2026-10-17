@@ -10,6 +10,7 @@ import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
 import { registerSchema } from "@/lib/auth/validation";
 import { db } from "@/lib/db";
+import { publicDbErrorMessage } from "@/lib/db/public-db-error";
 import { users } from "@/lib/db/schema";
 
 export async function POST(request: Request) {
@@ -62,8 +63,11 @@ export async function POST(request: Request) {
       user: { id, displayName, username },
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Registration failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return NextResponse.json(
+      {
+        error: publicDbErrorMessage(error, "Registration failed"),
+      },
+      { status: 400 },
+    );
   }
 }

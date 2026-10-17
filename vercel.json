@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "app/api/recommendations/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/globe/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/import/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}

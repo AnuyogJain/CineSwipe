@@ -37,14 +37,6 @@ export const userBackups = sqliteTable("user_backups", {
     .$defaultFn(() => new Date()),
 });
 
-export const appSettings = sqliteTable("app_settings", {
-  key: text("key").primaryKey(),
-  value: text("value").notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
-
 export const userApiKeys = sqliteTable("user_api_keys", {
   userId: text("user_id")
     .primaryKey()
