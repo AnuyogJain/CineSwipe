@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { AppHeader } from "@/components/AppHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppShellGate } from "@/components/AppShellGate";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -19,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CineSwipe",
   applicationName: "CineSwipe",
-  description: "Discover movies matched to your IMDb taste",
+  description: "Discover movies matched to your taste",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
@@ -50,11 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-background text-foreground">
         <ThemeProvider>
-          <AppHeader />
-          <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-y-auto overflow-x-hidden">
-            {children}
-          </main>
-          <BottomNav />
+          <AppShellGate>{children}</AppShellGate>
         </ThemeProvider>
       </body>
     </html>

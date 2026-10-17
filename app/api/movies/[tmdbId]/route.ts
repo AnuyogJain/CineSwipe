@@ -1,4 +1,10 @@
 import { NextResponse } from "next/server";
+import { and, eq } from "drizzle-orm";
+import {
+  runWithUserSession,
+  UnauthorizedError,
+} from "@/lib/auth/user-context";
+import { forUser } from "@/lib/db/user-scope";
 import {
   getMovieListState,
   getMovieSwipeStatus,
@@ -6,7 +12,6 @@ import {
 } from "@/lib/recommender";
 import { getEnrichedMovie } from "@/lib/tmdb";
 import { getImdbRatingForMovie } from "@/lib/omdb";
-import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { importedRatings } from "@/lib/db/schema";
 
@@ -14,6 +19,8 @@ export async function GET(
   _request: Request,
   context: { params: Promise<{ tmdbId: string }> },
 ) {
+  try {
+    return await runWithUserSession(async () => {
   try {
     const { tmdbId: tmdbIdParam } = await context.params;
     const tmdbId = Number(tmdbIdParam);
@@ -29,7 +36,9 @@ export async function GET(
       const imported = await db
         .select()
         .from(importedRatings)
-        .where(eq(importedRatings.imdbId, movie.imdbId))
+        .where(
+          and(forUser(importedRatings), eq(importedRatings.imdbId, movie.imdbId)),
+        )
         .limit(1);
       yourRating = imported[0]?.yourRating ?? null;
     }
@@ -53,5 +62,12 @@ export async function GET(
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to load movie";
     return NextResponse.json({ error: message }, { status: 400 });
+  }
+    });
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    throw error;
   }
 }

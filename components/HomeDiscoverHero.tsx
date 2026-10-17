@@ -28,15 +28,13 @@ export function HomeDiscoverHero({
     discoverHref = "/settings";
     discoverLabel = "Add API keys";
     subtitle = "Add TMDB and OMDb keys to unlock Discover and the globe map.";
-  } else if (!hasProfile) {
-    discoverHref = "/import";
-    discoverLabel = "Import ratings";
-    subtitle =
-      "Import your IMDb CSV to personalize Discover and plot watched titles on the globe.";
   } else if (topGenres.length > 0) {
     subtitle = `Picks tuned to ${topGenres
       .slice(0, 3)
       .join(", ")} and more, map liked and watched movies by country.`;
+  } else if (hasProfile) {
+    subtitle =
+      "Swipe to train your taste — import IMDb CSV anytime for richer picks.";
   }
 
   return (

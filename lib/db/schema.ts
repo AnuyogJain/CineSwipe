@@ -1,4 +1,35 @@
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, primaryKey } from "drizzle-orm/sqlite-core";
+
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  displayName: text("display_name").notNull(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const sessions = sqliteTable("sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const userBackups = sqliteTable("user_backups", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  payload: text("payload").notNull(),
+  uploadedAt: integer("uploaded_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
 
 export const appSettings = sqliteTable("app_settings", {
   key: text("key").primaryKey(),
@@ -8,8 +39,11 @@ export const appSettings = sqliteTable("app_settings", {
     .$defaultFn(() => new Date()),
 });
 
-export const importedRatings = sqliteTable("imported_ratings", {
-  imdbId: text("imdb_id").primaryKey(),
+export const importedRatings = sqliteTable(
+  "imported_ratings",
+  {
+  userId: text("user_id").notNull(),
+  imdbId: text("imdb_id").notNull(),
   tmdbId: integer("tmdb_id"),
   title: text("title").notNull(),
   originalTitle: text("original_title"),
@@ -23,10 +57,15 @@ export const importedRatings = sqliteTable("imported_ratings", {
   titleType: text("title_type"),
   dateRated: text("date_rated"),
   url: text("url"),
-});
+},
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.imdbId] }),
+  }),
+);
 
 export const swipeActions = sqliteTable("swipe_actions", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id").notNull(),
   tmdbId: integer("tmdb_id").notNull(),
   imdbId: text("imdb_id"),
   title: text("title").notNull(),
@@ -49,6 +88,7 @@ export const movieCache = sqliteTable("movie_cache", {
 
 export const tasteProfile = sqliteTable("taste_profile", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id").notNull(),
   genres: text("genres").notNull(),
   directors: text("directors").notNull(),
   cast: text("cast").notNull(),

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withUser } from "@/lib/api/run-with-user";
 import { TimeoutError, withTimeout } from "@/lib/fetch-timeout";
 import { getRecommendations } from "@/lib/recommender";
 import { ORIGIN_LANGUAGES } from "@/lib/languages";
@@ -15,7 +16,7 @@ function parseListParam(value: string | null): string[] {
     .filter(Boolean);
 }
 
-export async function GET(request: Request) {
+export const GET = withUser(async (request: Request) => {
   try {
     const { searchParams } = new URL(request.url);
     const genres = [
@@ -60,4 +61,4 @@ export async function GET(request: Request) {
     const status = error instanceof TimeoutError ? 504 : 400;
     return NextResponse.json({ error: message }, { status });
   }
-}
+});

@@ -1,15 +1,22 @@
 import "server-only";
 
 import { and, desc, eq, inArray, or } from "drizzle-orm";
+import { forUser } from "./db/user-scope";
 import { db } from "./db";
 import { importedRatings, movieCache, swipeActions } from "./db/schema";
+import { requestUserId } from "./user-context";
 import {
   importRowMatchesGenreFilter,
   normalizeCountryCodes,
   rowMatchesCountryFilter,
 } from "./list-filters";
 import type { MovieListState } from "./movie-list-state";
-import { getTasteProfile, rebuildTasteProfile, updateTasteProfileFromSwipe } from "./taste-profile";
+import {
+  buildTasteProfileFromRatings,
+  getTasteProfile,
+  rebuildTasteProfile,
+  updateTasteProfileFromSwipe,
+} from "./taste-profile";
 import {
   discoverMovies,
   findTmdbIdByImdbId,
@@ -124,10 +131,12 @@ async function getExcludedTmdbIds(): Promise<Set<number>> {
   const excluded = new Set<number>();
   const ratings = await db
     .select({ imdbId: importedRatings.imdbId, tmdbId: importedRatings.tmdbId })
-    .from(importedRatings);
+    .from(importedRatings)
+    .where(forUser(importedRatings));
   const swipes = await db
     .select({ tmdbId: swipeActions.tmdbId })
-    .from(swipeActions);
+    .from(swipeActions)
+    .where(forUser(swipeActions));
 
   for (const row of ratings) {
     if (row.tmdbId) excluded.add(row.tmdbId);
@@ -228,7 +237,10 @@ const MIN_IMDB_VOTES = 1_000;
 const MIN_IMDB_VOTES_GENRE = 500;
 
 async function getQualityThreshold(genreBrowse: boolean): Promise<number> {
-  const ratings = await db.select().from(importedRatings);
+  const ratings = await db
+    .select()
+    .from(importedRatings)
+    .where(forUser(importedRatings));
   const reference = ratings.filter(
     (r) => (r.yourRating ?? 0) >= 7 && r.imdbRating != null && r.imdbRating > 0
   );
@@ -289,7 +301,9 @@ async function enrichCandidate(
       const imported = await db
         .select()
         .from(importedRatings)
-        .where(eq(importedRatings.imdbId, movie.imdbId))
+        .where(
+          and(forUser(importedRatings), eq(importedRatings.imdbId, movie.imdbId)),
+        )
         .limit(1);
       yourRating = imported[0]?.yourRating ?? null;
     }
@@ -460,10 +474,8 @@ export async function getRecommendations(options: {
   const selectedCountries = (options.countries ?? [])
     .map((c) => c.trim().toUpperCase())
     .filter((c) => /^[A-Z]{2}$/.test(c));
-  const profile = await getTasteProfile();
-  if (!profile) {
-    throw new Error("Import your IMDb ratings first to build a taste profile.");
-  }
+  const profile =
+    (await getTasteProfile()) ?? buildTasteProfileFromRatings([]);
 
   const excluded = await getExcludedTmdbIds();
   const candidateIds = new Set<number>();
@@ -479,7 +491,10 @@ export async function getRecommendations(options: {
   const minImdbRating = await getQualityThreshold(browseMode);
   const discoverVoteFloor = browseMode ? 40 : 100;
 
-  const allRated = await db.select().from(importedRatings);
+  const allRated = await db
+    .select()
+    .from(importedRatings)
+    .where(forUser(importedRatings));
   const topGenres = Object.entries(profile.genres)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 6)
@@ -593,6 +608,8 @@ export async function getRecommendations(options: {
           .map((name) => resolveGenreId(genreMap, name))
           .filter((id): id is number => id != null)
       : [];
+    /** New account / no imports yet — no genre seeds for Discover. */
+    const coldStart = !filterActive && openGenres.length === 0;
 
     let discoverCursor = page;
 
@@ -622,6 +639,22 @@ export async function getRecommendations(options: {
               });
             }
           }
+        }
+      } else if (coldStart) {
+        try {
+          const discovered = await discoverMovies({
+            page: p,
+            voteCountGte: discoverVoteFloor,
+            sortBy: "popularity.desc",
+          });
+          rawFromTmdb += discovered.length;
+          added += addCandidates(discovered);
+        } catch (err) {
+          console.warn("[recs] discover failed", {
+            page: p,
+            coldStart: true,
+            err: err instanceof Error ? err.message : err,
+          });
         }
       } else {
         for (const genreId of openGenres) {
@@ -677,9 +710,10 @@ export async function getRecommendations(options: {
     discoverCursor += 1;
     await enrichNeeded();
 
-    // Overfetch only when this window is empty or every title is a weak taste fit.
+    // Overfetch when empty, or weak fit once taste exists (cold start scores stay low).
     const needsMore =
-      scored.length === 0 || bestMatchScore() < WEAK_FIT_SCORE;
+      scored.length === 0 ||
+      (!coldStart && bestMatchScore() < WEAK_FIT_SCORE);
     if (needsMore) {
       console.info("[recs] overfetch", {
         reason: scored.length === 0 ? "empty_pool" : "weak_fit",
@@ -865,7 +899,10 @@ export async function getWatchedMovies(options?: {
   const languageFilters = (options?.languages ?? []).map((l) => l.toLowerCase());
   const countryFilters = normalizeCountryCodes(options?.countries ?? []);
 
-  const rows = await db.select().from(importedRatings);
+  const rows = await db
+    .select()
+    .from(importedRatings)
+    .where(forUser(importedRatings));
   let eligible = rows
     .filter((row) => isGlobeEligibleTitleType(row.titleType))
     .sort((a, b) => {
@@ -938,14 +975,16 @@ export async function getListMovies(
       await db
         .select({ tmdbId: swipeActions.tmdbId })
         .from(swipeActions)
-        .where(eq(swipeActions.action, "wishlist"))
+        .where(
+          and(forUser(swipeActions), eq(swipeActions.action, "wishlist")),
+        )
     ).map((r) => r.tmdbId)
   );
 
   const rows = await db
     .select()
     .from(swipeActions)
-    .where(eq(swipeActions.action, action))
+    .where(and(forUser(swipeActions), eq(swipeActions.action, action)))
     .orderBy(desc(swipeActions.createdAt));
 
   const seen = new Set<number>();
@@ -1004,7 +1043,11 @@ export async function removeFromLiked(tmdbId: number): Promise<boolean> {
     .select({ id: swipeActions.id })
     .from(swipeActions)
     .where(
-      and(eq(swipeActions.tmdbId, tmdbId), eq(swipeActions.action, "like"))
+      and(
+        forUser(swipeActions),
+        eq(swipeActions.tmdbId, tmdbId),
+        eq(swipeActions.action, "like"),
+      ),
     )
     .limit(1);
 
@@ -1013,7 +1056,11 @@ export async function removeFromLiked(tmdbId: number): Promise<boolean> {
   await db
     .delete(swipeActions)
     .where(
-      and(eq(swipeActions.tmdbId, tmdbId), eq(swipeActions.action, "like"))
+      and(
+        forUser(swipeActions),
+        eq(swipeActions.tmdbId, tmdbId),
+        eq(swipeActions.action, "like"),
+      ),
     );
 
   return true;
@@ -1024,7 +1071,11 @@ export async function removeFromWishlist(tmdbId: number): Promise<boolean> {
     .select({ id: swipeActions.id })
     .from(swipeActions)
     .where(
-      and(eq(swipeActions.tmdbId, tmdbId), eq(swipeActions.action, "wishlist"))
+      and(
+        forUser(swipeActions),
+        eq(swipeActions.tmdbId, tmdbId),
+        eq(swipeActions.action, "wishlist"),
+      ),
     )
     .limit(1);
 
@@ -1033,7 +1084,11 @@ export async function removeFromWishlist(tmdbId: number): Promise<boolean> {
   await db
     .delete(swipeActions)
     .where(
-      and(eq(swipeActions.tmdbId, tmdbId), eq(swipeActions.action, "wishlist"))
+      and(
+        forUser(swipeActions),
+        eq(swipeActions.tmdbId, tmdbId),
+        eq(swipeActions.action, "wishlist"),
+      ),
     );
 
   return true;
@@ -1044,7 +1099,11 @@ export async function promoteToWishlist(tmdbId: number): Promise<boolean> {
     .select()
     .from(swipeActions)
     .where(
-      and(eq(swipeActions.tmdbId, tmdbId), eq(swipeActions.action, "like"))
+      and(
+        forUser(swipeActions),
+        eq(swipeActions.tmdbId, tmdbId),
+        eq(swipeActions.action, "like"),
+      ),
     )
     .orderBy(desc(swipeActions.createdAt))
     .limit(1);
@@ -1056,12 +1115,17 @@ export async function promoteToWishlist(tmdbId: number): Promise<boolean> {
     .select({ id: swipeActions.id })
     .from(swipeActions)
     .where(
-      and(eq(swipeActions.tmdbId, tmdbId), eq(swipeActions.action, "wishlist"))
+      and(
+        forUser(swipeActions),
+        eq(swipeActions.tmdbId, tmdbId),
+        eq(swipeActions.action, "wishlist"),
+      ),
     )
     .limit(1);
 
   if (existingWishlist.length === 0) {
     await db.insert(swipeActions).values({
+      userId: requestUserId(),
       tmdbId: row.tmdbId,
       imdbId: row.imdbId,
       title: row.title,
@@ -1075,7 +1139,11 @@ export async function promoteToWishlist(tmdbId: number): Promise<boolean> {
   await db
     .delete(swipeActions)
     .where(
-      and(eq(swipeActions.tmdbId, tmdbId), eq(swipeActions.action, "like"))
+      and(
+        forUser(swipeActions),
+        eq(swipeActions.tmdbId, tmdbId),
+        eq(swipeActions.action, "like"),
+      ),
     );
 
   return true;
@@ -1094,7 +1162,7 @@ export async function getMovieSwipeStatus(tmdbId: number): Promise<{
   const rows = await db
     .select({ action: swipeActions.action })
     .from(swipeActions)
-    .where(eq(swipeActions.tmdbId, tmdbId));
+    .where(and(forUser(swipeActions), eq(swipeActions.tmdbId, tmdbId)));
 
   return {
     inLiked: rows.some((r) => r.action === "like"),
@@ -1166,6 +1234,7 @@ async function insertSwipeListAction(
     .from(swipeActions)
     .where(
       and(
+        forUser(swipeActions),
         eq(swipeActions.tmdbId, candidate.tmdbId),
         eq(swipeActions.action, action),
       ),
@@ -1174,6 +1243,7 @@ async function insertSwipeListAction(
 
   if (existing.length === 0) {
     await db.insert(swipeActions).values({
+      userId: requestUserId(),
       tmdbId: candidate.tmdbId,
       imdbId: candidate.imdbId ?? null,
       title: candidate.title,
@@ -1252,12 +1322,15 @@ export async function isMovieInWatchedLibrary(
     .select({ imdbId: importedRatings.imdbId })
     .from(importedRatings)
     .where(
-      imdbId
-        ? or(
-            eq(importedRatings.tmdbId, tmdbId),
-            eq(importedRatings.imdbId, imdbId),
-          )
-        : eq(importedRatings.tmdbId, tmdbId),
+      and(
+        forUser(importedRatings),
+        imdbId
+          ? or(
+              eq(importedRatings.tmdbId, tmdbId),
+              eq(importedRatings.imdbId, imdbId),
+            )
+          : eq(importedRatings.tmdbId, tmdbId),
+      ),
     )
     .limit(1);
 
@@ -1268,14 +1341,21 @@ export async function removeFromWatched(tmdbId: number): Promise<boolean> {
   const rows = await db
     .select({ imdbId: importedRatings.imdbId })
     .from(importedRatings)
-    .where(eq(importedRatings.tmdbId, tmdbId))
+    .where(
+      and(forUser(importedRatings), eq(importedRatings.tmdbId, tmdbId)),
+    )
     .limit(1);
 
   if (rows.length === 0) return false;
 
   await db
     .delete(importedRatings)
-    .where(eq(importedRatings.imdbId, rows[0]!.imdbId));
+    .where(
+      and(
+        forUser(importedRatings),
+        eq(importedRatings.imdbId, rows[0]!.imdbId),
+      ),
+    );
 
   await rebuildTasteProfile();
   return true;
@@ -1300,20 +1380,23 @@ export async function markMovieAsWatched(
     const byImdb = await db
       .select()
       .from(importedRatings)
-      .where(eq(importedRatings.imdbId, imdbId))
+      .where(and(forUser(importedRatings), eq(importedRatings.imdbId, imdbId)))
       .limit(1);
     if (byImdb.length > 0) {
       if (!byImdb[0].tmdbId) {
         await db
           .update(importedRatings)
           .set({ tmdbId })
-          .where(eq(importedRatings.imdbId, imdbId));
+          .where(
+            and(forUser(importedRatings), eq(importedRatings.imdbId, imdbId)),
+          );
       }
       return { alreadyWatched: true };
     }
   }
 
   await db.insert(importedRatings).values({
+    userId: requestUserId(),
     imdbId,
     tmdbId,
     title: movie.title,
@@ -1334,7 +1417,10 @@ export async function markMovieAsWatched(
 }
 
 export async function getImportedCount(): Promise<number> {
-  const rows = await db.select().from(importedRatings);
+  const rows = await db
+    .select()
+    .from(importedRatings)
+    .where(forUser(importedRatings));
   return rows.length;
 }
 

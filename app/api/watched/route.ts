@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { withUser } from "@/lib/api/run-with-user";
 import {
   getWatchedMovies,
   markMovieAsWatched,
@@ -10,7 +11,7 @@ const markWatchedSchema = z.object({
   tmdbId: z.number().int().positive(),
 });
 
-export async function GET(request: Request) {
+export const GET = withUser(async (request: Request) => {
   try {
     const { searchParams } = new URL(request.url);
     const page = Number(searchParams.get("page") ?? "1");
@@ -43,9 +44,9 @@ export async function GET(request: Request) {
       error instanceof Error ? error.message : "Failed to load watched movies";
     return NextResponse.json({ error: message }, { status: 400 });
   }
-}
+});
 
-export async function POST(request: Request) {
+export const POST = withUser(async (request: Request) => {
   try {
     const json = await request.json();
     const parsed = markWatchedSchema.safeParse(json);
@@ -60,9 +61,9 @@ export async function POST(request: Request) {
       error instanceof Error ? error.message : "Failed to mark as watched";
     return NextResponse.json({ error: message }, { status: 400 });
   }
-}
+});
 
-export async function DELETE(request: Request) {
+export const DELETE = withUser(async (request: Request) => {
   try {
     const json = await request.json();
     const parsed = markWatchedSchema.safeParse(json);
@@ -83,4 +84,4 @@ export async function DELETE(request: Request) {
       error instanceof Error ? error.message : "Failed to remove from watched";
     return NextResponse.json({ error: message }, { status: 400 });
   }
-}
+});

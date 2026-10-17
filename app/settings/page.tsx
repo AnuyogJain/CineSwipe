@@ -21,6 +21,8 @@ export default function SettingsPage() {
   } | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [backupMessage, setBackupMessage] = useState<string | null>(null);
+  const [backupBusy, setBackupBusy] = useState(false);
   useEffect(() => {
     fetch("/api/settings")
       .then((r) => r.json())
@@ -31,6 +33,52 @@ export default function SettingsPage() {
       .then(setAppStatus)
       .catch(() => null);
   }, []);
+
+  const exportBackup = () => {
+    window.location.href = "/api/backup/export";
+  };
+
+  const importBackup = async (file: File) => {
+    setBackupBusy(true);
+    setBackupMessage(null);
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      const res = await fetch("/api/backup/import", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Import failed");
+      setBackupMessage("Library restored from backup.");
+      const stat = await fetch("/api/status").then((r) => r.json());
+      setAppStatus(stat);
+    } catch (err) {
+      setBackupMessage(
+        err instanceof Error ? err.message : "Could not import backup",
+      );
+    } finally {
+      setBackupBusy(false);
+    }
+  };
+
+  const uploadServerBackup = async () => {
+    setBackupBusy(true);
+    setBackupMessage(null);
+    try {
+      const res = await fetch("/api/backup/upload", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Upload failed");
+      setBackupMessage("Backup saved on server.");
+    } catch (err) {
+      setBackupMessage(
+        err instanceof Error ? err.message : "Server backup failed",
+      );
+    } finally {
+      setBackupBusy(false);
+    }
+  };
+
+  const downloadServerBackup = () => {
+    window.location.href = "/api/backup/download";
+  };
 
   const saveKeys = async () => {
     setSaving(true);
@@ -66,15 +114,65 @@ export default function SettingsPage() {
       <div>
         <h2 className="text-2xl font-bold">Settings</h2>
         <p className="mt-1 text-sm text-muted">
-          Add your free API keys here — stored locally, never sent to the browser bundle.
+          Your library is tied to your account. API keys are stored on this server.
         </p>
       </div>
 
       <section className="app-panel space-y-3 rounded-2xl p-4">
-        <h3 className="font-semibold">Import ratings</h3>
+        <h3 className="font-semibold">Backup library</h3>
         <p className="text-sm text-muted">
-          Upload your IMDb ratings export (CSV) to build your taste profile and unlock
-          recommendations.
+          Export a CineSwipe CSV (likes, passes, wishlist, ratings, taste). Import
+          replaces your current library on this account.
+        </p>
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            disabled={backupBusy}
+            onClick={exportBackup}
+            className="w-full rounded-xl app-btn-secondary py-2.5 text-sm font-medium disabled:opacity-40"
+          >
+            Export CSV
+          </button>
+          <label className="w-full cursor-pointer rounded-xl border border-white/10 py-2.5 text-center text-sm font-medium transition hover:bg-white/5">
+            Import CSV (replace)
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              className="sr-only"
+              disabled={backupBusy}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void importBackup(f);
+                e.target.value = "";
+              }}
+            />
+          </label>
+          <button
+            type="button"
+            disabled={backupBusy}
+            onClick={() => void uploadServerBackup()}
+            className="w-full rounded-xl bg-rose-500/20 py-2.5 text-sm font-medium text-rose-100 ring-1 ring-rose-400/30 disabled:opacity-40"
+          >
+            Backup to server
+          </button>
+          <button
+            type="button"
+            disabled={backupBusy}
+            onClick={downloadServerBackup}
+            className="w-full rounded-xl app-btn-secondary py-2.5 text-sm font-medium disabled:opacity-40"
+          >
+            Download server backup
+          </button>
+        </div>
+        {backupMessage ? (
+          <p className="text-sm text-emerald-300">{backupMessage}</p>
+        ) : null}
+      </section>
+
+      <section className="app-panel space-y-3 rounded-2xl p-4">
+        <h3 className="font-semibold">Import ratings (optional)</h3>
+        <p className="text-sm text-muted">
+          IMDb CSV import still boosts recommendations — not required to start swiping.
         </p>
         <Link
           href="/import"

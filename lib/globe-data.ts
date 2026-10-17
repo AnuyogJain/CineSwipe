@@ -1,6 +1,7 @@
 import "server-only";
 
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
+import { forUser } from "./db/user-scope";
 import { spreadMovieOnLand } from "./country-geometry";
 import { countryName, getCentroid, COUNTRY_CENTROIDS } from "./countries";
 import { db } from "./db";
@@ -24,7 +25,7 @@ async function resolveTmdbId(
     await db
       .update(importedRatings)
       .set({ tmdbId })
-      .where(eq(importedRatings.imdbId, imdbId));
+      .where(and(forUser(importedRatings), eq(importedRatings.imdbId, imdbId)));
   }
   return tmdbId;
 }
@@ -138,7 +139,10 @@ async function draftFromTmdbId(
 }
 
 async function buildViewedDataset(): Promise<GlobeDataset> {
-  const allRows = await db.select().from(importedRatings);
+  const allRows = await db
+    .select()
+    .from(importedRatings)
+    .where(forUser(importedRatings));
   const rows = allRows.filter((row) => isGlobeEligibleTitleType(row.titleType));
   const total = rows.length;
 
@@ -170,14 +174,16 @@ async function buildSwipeDataset(action: "like" | "wishlist"): Promise<GlobeData
       await db
         .select({ tmdbId: swipeActions.tmdbId })
         .from(swipeActions)
-        .where(eq(swipeActions.action, "wishlist"))
+        .where(
+          and(forUser(swipeActions), eq(swipeActions.action, "wishlist")),
+        )
     ).map((r) => r.tmdbId),
   );
 
   const rows = await db
     .select()
     .from(swipeActions)
-    .where(eq(swipeActions.action, action))
+    .where(and(forUser(swipeActions), eq(swipeActions.action, action)))
     .orderBy(desc(swipeActions.createdAt));
 
   const seen = new Set<number>();

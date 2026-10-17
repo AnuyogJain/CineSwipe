@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { withUser } from "@/lib/api/run-with-user";
 import { getImportedCount } from "@/lib/recommender";
 import { getTasteProfile } from "@/lib/taste-profile";
 import { hasRequiredKeys } from "@/lib/settings";
 
-export async function GET() {
+export const GET = withUser(async () => {
   const [importedCount, profile, keysReady] = await Promise.all([
     getImportedCount(),
     getTasteProfile(),
@@ -21,4 +22,4 @@ export async function GET() {
           .map(([name]) => name)
       : [],
   });
-}
+});

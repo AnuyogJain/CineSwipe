@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
+import { withUser } from "@/lib/api/run-with-user";
+import { forUser } from "@/lib/db/user-scope";
 import { db } from "@/lib/db";
 import { swipeActions } from "@/lib/db/schema";
 import { updateTasteProfileFromSwipe } from "@/lib/taste-profile";
+import { requestUserId } from "@/lib/user-context";
 import type { MovieCandidate } from "@/lib/types";
 import { z } from "zod";
 
@@ -29,7 +32,7 @@ const bodySchema = z.object({
   fullPayload: z.custom<MovieCandidate>().optional(),
 });
 
-export async function POST(request: Request) {
+export const POST = withUser(async (request: Request) => {
   try {
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);
@@ -38,6 +41,7 @@ export async function POST(request: Request) {
     }
 
     const { action, movie, fullPayload } = parsed.data;
+    const userId = requestUserId();
 
     if (action === "wishlist") {
       const existing = await db
@@ -45,6 +49,7 @@ export async function POST(request: Request) {
         .from(swipeActions)
         .where(
           and(
+            forUser(swipeActions),
             eq(swipeActions.tmdbId, movie.tmdbId),
             eq(swipeActions.action, "wishlist"),
           ),
@@ -53,6 +58,7 @@ export async function POST(request: Request) {
 
       if (existing.length === 0) {
         await db.insert(swipeActions).values({
+          userId,
           tmdbId: movie.tmdbId,
           imdbId: movie.imdbId ?? null,
           title: movie.title,
@@ -66,10 +72,26 @@ export async function POST(request: Request) {
       await db
         .delete(swipeActions)
         .where(
-          and(eq(swipeActions.tmdbId, movie.tmdbId), eq(swipeActions.action, "like")),
+          and(
+            forUser(swipeActions),
+            eq(swipeActions.tmdbId, movie.tmdbId),
+            eq(swipeActions.action, "like"),
+          ),
         );
     } else {
+      if (action === "pass" || action === "like") {
+        await db
+          .delete(swipeActions)
+          .where(
+            and(
+              forUser(swipeActions),
+              eq(swipeActions.tmdbId, movie.tmdbId),
+              eq(swipeActions.action, action),
+            ),
+          );
+      }
       await db.insert(swipeActions).values({
+        userId,
         tmdbId: movie.tmdbId,
         imdbId: movie.imdbId ?? null,
         title: movie.title,
@@ -96,4 +118,4 @@ export async function POST(request: Request) {
     const message = error instanceof Error ? error.message : "Swipe failed";
     return NextResponse.json({ error: message }, { status: 400 });
   }
-}
+});

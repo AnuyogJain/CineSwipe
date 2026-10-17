@@ -42,3 +42,8 @@ next-env.d.ts
 
 # local sqlite db + api keys storage
 /data/
+
+# Capacitor (install deps in mobile/; android/ generated locally)
+mobile/node_modules/
+mobile/android/
+mobile/.capacitor/

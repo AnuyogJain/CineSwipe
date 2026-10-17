@@ -9,7 +9,6 @@ import {
   Heart,
   Home,
   iconNavClass,
-  Settings,
   Star,
 } from "@/components/icons";
 
@@ -19,7 +18,6 @@ const links: Array<{ href: string; label: string; Icon: LucideIcon }> = [
   { href: "/liked", label: "Liked", Icon: Heart },
   { href: "/wishlist", label: "Wishlist", Icon: Star },
   { href: "/watched", label: "Watched", Icon: Eye },
-  { href: "/settings", label: "Settings", Icon: Settings },
 ];
 
 export function BottomNav() {

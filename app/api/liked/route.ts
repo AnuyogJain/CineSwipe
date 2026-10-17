@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
+import { withUser } from "@/lib/api/run-with-user";
 import {
   getListMovies,
   promoteToWishlist,
   removeFromLiked,
 } from "@/lib/recommender";
 
-export async function GET() {
+export const GET = withUser(async () => {
   try {
     const movies = await getListMovies("like");
     return NextResponse.json({ movies });
@@ -13,9 +14,9 @@ export async function GET() {
     const message = error instanceof Error ? error.message : "Failed to load liked movies";
     return NextResponse.json({ error: message }, { status: 400 });
   }
-}
+});
 
-export async function DELETE(request: Request) {
+export const DELETE = withUser(async (request: Request) => {
   try {
     const { tmdbId } = (await request.json()) as { tmdbId?: number };
     if (!tmdbId) {
@@ -31,9 +32,9 @@ export async function DELETE(request: Request) {
       error instanceof Error ? error.message : "Failed to remove from liked";
     return NextResponse.json({ error: message }, { status: 400 });
   }
-}
+});
 
-export async function POST(request: Request) {
+export const POST = withUser(async (request: Request) => {
   try {
     const { tmdbId } = (await request.json()) as { tmdbId?: number };
     if (!tmdbId) {
@@ -48,4 +49,4 @@ export async function POST(request: Request) {
     const message = error instanceof Error ? error.message : "Failed to promote";
     return NextResponse.json({ error: message }, { status: 400 });
   }
-}
+});

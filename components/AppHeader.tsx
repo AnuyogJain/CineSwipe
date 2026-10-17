@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, iconHeaderClass } from "@/components/icons";
 import { MovieSearchDialog } from "./MovieSearchDialog";
+import { UserMenu } from "./UserMenu";
 
 export function AppHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -15,15 +16,18 @@ export function AppHeader() {
             <span className="font-normal text-accent-text">Cine</span>
             Swipe
           </h1>
-          <button
-            type="button"
-            aria-label="Search movies"
-            title="Search movies"
-            onClick={() => setSearchOpen(true)}
-            className="flex shrink-0 items-center justify-center rounded-xl border border-white/10 bg-surface px-3 py-2 transition hover:bg-white/10"
-          >
-            <Search className={iconHeaderClass} strokeWidth={2} aria-hidden />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              aria-label="Search movies"
+              title="Search movies"
+              onClick={() => setSearchOpen(true)}
+              className="flex shrink-0 items-center justify-center rounded-xl border border-white/10 bg-surface px-3 py-2 transition hover:bg-white/10"
+            >
+              <Search className={iconHeaderClass} strokeWidth={2} aria-hidden />
+            </button>
+            <UserMenu />
+          </div>
         </div>
       </header>
       <MovieSearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />

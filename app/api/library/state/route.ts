@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { withUser } from "@/lib/api/run-with-user";
 import { setMovieListState } from "@/lib/recommender";
 import type { MovieCandidate } from "@/lib/types";
 import type { MovieListState } from "@/lib/movie-list-state";
@@ -10,7 +11,7 @@ const bodySchema = z.object({
   fullPayload: z.custom<MovieCandidate>().optional(),
 });
 
-export async function POST(request: Request) {
+export const POST = withUser(async (request: Request) => {
   try {
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);
@@ -34,4 +35,4 @@ export async function POST(request: Request) {
       error instanceof Error ? error.message : "Failed to update list state";
     return NextResponse.json({ error: message }, { status: 400 });
   }
-}
+});

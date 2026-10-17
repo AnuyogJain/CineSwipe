@@ -1,8 +1,10 @@
 import "server-only";
 
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
+import { forUser } from "./db/user-scope";
 import { db } from "./db";
 import { importedRatings, tasteProfile } from "./db/schema";
+import { requestUserId } from "./user-context";
 import type { ParsedRating } from "./csv-parser";
 import type { TasteProfileData } from "./types";
 
@@ -95,6 +97,7 @@ export async function enrichCastFromTopRated(limit = 12): Promise<void> {
   const topRows = await db
     .select()
     .from(importedRatings)
+    .where(forUser(importedRatings))
     .orderBy(desc(importedRatings.yourRating))
     .limit(limit);
 
@@ -114,8 +117,9 @@ export async function enrichCastFromTopRated(limit = 12): Promise<void> {
   }
 
   const now = new Date();
-  await db.delete(tasteProfile);
+  await db.delete(tasteProfile).where(forUser(tasteProfile));
   await db.insert(tasteProfile).values({
+    userId: requestUserId(),
     genres: JSON.stringify(profile.genres),
     directors: JSON.stringify(profile.directors),
     cast: JSON.stringify(profile.cast),
@@ -128,7 +132,10 @@ export async function enrichCastFromTopRated(limit = 12): Promise<void> {
 }
 
 export async function rebuildTasteProfile(): Promise<TasteProfileData> {
-  const ratings = await db.select().from(importedRatings);
+  const ratings = await db
+    .select()
+    .from(importedRatings)
+    .where(forUser(importedRatings));
   const parsed: ParsedRating[] = ratings.map((r) => ({
     imdbId: r.imdbId,
     title: r.title,
@@ -148,8 +155,9 @@ export async function rebuildTasteProfile(): Promise<TasteProfileData> {
   const profile = buildTasteProfileFromRatings(parsed);
   const now = new Date();
 
-  await db.delete(tasteProfile);
+  await db.delete(tasteProfile).where(forUser(tasteProfile));
   await db.insert(tasteProfile).values({
+    userId: requestUserId(),
     genres: JSON.stringify(profile.genres),
     directors: JSON.stringify(profile.directors),
     cast: JSON.stringify(profile.cast),
@@ -167,6 +175,7 @@ export async function getTasteProfile(): Promise<TasteProfileData | null> {
   const rows = await db
     .select()
     .from(tasteProfile)
+    .where(forUser(tasteProfile))
     .orderBy(desc(tasteProfile.updatedAt))
     .limit(1);
 
@@ -213,8 +222,9 @@ export async function updateTasteProfileFromSwipe(
   }
 
   const now = new Date();
-  await db.delete(tasteProfile);
+  await db.delete(tasteProfile).where(forUser(tasteProfile));
   await db.insert(tasteProfile).values({
+    userId: requestUserId(),
     genres: JSON.stringify(profile.genres),
     directors: JSON.stringify(profile.directors),
     cast: JSON.stringify(profile.cast),

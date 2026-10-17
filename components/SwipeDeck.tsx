@@ -249,7 +249,7 @@ export function SwipeDeck({
 
   useEffect(() => {
     if (!setup) return;
-    if (!setup.keysReady || !setup.hasProfile) {
+    if (!setup.keysReady) {
       setLoading(false);
       return;
     }
@@ -397,7 +397,7 @@ export function SwipeDeck({
   };
 
   const discoverToolbar =
-    setup?.keysReady && setup?.hasProfile ? (
+    setup?.keysReady ? (
       <div className="relative z-30 flex shrink-0 items-start gap-2">
         <CastSearchField
           selected={castFilter}
@@ -433,7 +433,7 @@ export function SwipeDeck({
         ? "Applying filters & loading picks…"
         : "Finding movies matched to your taste…";
 
-    if (setup?.keysReady && setup?.hasProfile) {
+    if (setup?.keysReady) {
       return (
         <DiscoverDeckShell toolbar={discoverToolbar}>
           <div className="flex flex-1 items-center justify-center p-8">
@@ -461,22 +461,6 @@ export function SwipeDeck({
           className="rounded-full bg-rose-500 px-5 py-2.5 text-sm font-medium text-white"
         >
           Open Settings
-        </Link>
-      </div>
-    );
-  }
-
-  if (!setup.hasProfile) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-        <p className="text-lg font-semibold text-white">
-          Import your IMDb ratings
-        </p>
-        <Link
-          href="/import"
-          className="rounded-full bg-rose-500 px-5 py-2.5 text-sm font-medium text-white"
-        >
-          Import CSV
         </Link>
       </div>
     );

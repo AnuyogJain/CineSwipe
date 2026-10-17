@@ -1,8 +1,9 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "./db";
 import { importedRatings, movieCache } from "./db/schema";
+import { optionalUserId } from "./user-context";
 import { fetchWithTimeout } from "./fetch-timeout";
 import { getApiKeys } from "./settings";
 import type { OmdbRating } from "./types";
@@ -98,11 +99,19 @@ export async function getImdbRatingForMovie(
     };
   }
 
-  const imported = await db
-    .select()
-    .from(importedRatings)
-    .where(eq(importedRatings.imdbId, imdbId))
-    .limit(1);
+  const userId = optionalUserId();
+  const imported = userId
+    ? await db
+        .select()
+        .from(importedRatings)
+        .where(
+          and(
+            eq(importedRatings.userId, userId),
+            eq(importedRatings.imdbId, imdbId),
+          ),
+        )
+        .limit(1)
+    : [];
 
   const importedRow = imported[0];
   if (importedRow?.imdbRating != null) {

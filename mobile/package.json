@@ -1,0 +1,18 @@
+{
+  "name": "cineswipe-mobile",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Capacitor shell for hosted CineSwipe",
+  "scripts": {
+    "cap:sync": "cap sync",
+    "cap:android": "cap open android",
+    "cap:add:android": "cap add android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.2",
+    "@capacitor/core": "^7.4.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.2"
+  }
+}

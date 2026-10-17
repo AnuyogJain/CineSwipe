@@ -5,6 +5,8 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import * as schema from "./schema";
+import { migrateAuth } from "./migrate-auth";
+import { migrateUserScope } from "./migrate-user-scope";
 
 const globalForDb = globalThis as unknown as {
   sqlite?: Database.Database;
@@ -30,7 +32,8 @@ function initSqlite() {
         updated_at INTEGER NOT NULL
       );
       CREATE TABLE IF NOT EXISTS imported_ratings (
-        imdb_id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL DEFAULT 'legacy',
+        imdb_id TEXT NOT NULL,
         tmdb_id INTEGER,
         title TEXT NOT NULL,
         original_title TEXT,
@@ -43,10 +46,12 @@ function initSqlite() {
         runtime INTEGER,
         title_type TEXT,
         date_rated TEXT,
-        url TEXT
+        url TEXT,
+        PRIMARY KEY (user_id, imdb_id)
       );
       CREATE TABLE IF NOT EXISTS swipe_actions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL DEFAULT 'legacy',
         tmdb_id INTEGER NOT NULL,
         imdb_id TEXT,
         title TEXT NOT NULL,
@@ -65,6 +70,7 @@ function initSqlite() {
       );
       CREATE TABLE IF NOT EXISTS taste_profile (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL DEFAULT 'legacy',
         genres TEXT NOT NULL,
         directors TEXT NOT NULL,
         cast TEXT NOT NULL,
@@ -75,6 +81,8 @@ function initSqlite() {
         updated_at INTEGER NOT NULL
       );
     `);
+    migrateUserScope(sqlite);
+    migrateAuth(sqlite);
     globalForDb.sqlite = sqlite;
     globalForDb.db = drizzle(sqlite, { schema });
   }

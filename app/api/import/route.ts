@@ -1,13 +1,16 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { withUser } from "@/lib/api/run-with-user";
 import { parseImdbCsv } from "@/lib/csv-parser";
+import { forUser } from "@/lib/db/user-scope";
 import { db } from "@/lib/db";
 import { importedRatings } from "@/lib/db/schema";
 import { rebuildTasteProfile, enrichCastFromTopRated } from "@/lib/taste-profile";
 import { findTmdbIdByImdbId } from "@/lib/tmdb";
 import { hasRequiredKeys } from "@/lib/settings";
+import { requestUserId } from "@/lib/user-context";
 
-export async function POST(request: Request) {
+export const POST = withUser(async (request: Request) => {
   try {
     const formData = await request.formData();
     const file = formData.get("file");
@@ -18,10 +21,11 @@ export async function POST(request: Request) {
     const csvText = await file.text();
     const ratings = parseImdbCsv(csvText);
 
-    await db.delete(importedRatings);
+    await db.delete(importedRatings).where(forUser(importedRatings));
 
     for (const rating of ratings) {
       await db.insert(importedRatings).values({
+        userId: requestUserId(),
         imdbId: rating.imdbId,
         title: rating.title,
         originalTitle: rating.originalTitle,
@@ -51,7 +55,12 @@ export async function POST(request: Request) {
             await db
               .update(importedRatings)
               .set({ tmdbId })
-              .where(eq(importedRatings.imdbId, row.imdbId));
+              .where(
+                and(
+                  forUser(importedRatings),
+                  eq(importedRatings.imdbId, row.imdbId),
+                ),
+              );
           }
         } catch {
           // mapping optional during import
@@ -71,4 +80,4 @@ export async function POST(request: Request) {
     const message = error instanceof Error ? error.message : "Import failed";
     return NextResponse.json({ error: message }, { status: 400 });
   }
-}
+});
