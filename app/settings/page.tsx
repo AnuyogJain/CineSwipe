@@ -12,6 +12,7 @@ export default function SettingsPage() {
     omdbConfigured: boolean;
     tmdbMasked: string;
     omdbMasked: string;
+    demoKeysAvailable?: boolean;
   } | null>(null);
   const [appStatus, setAppStatus] = useState<{
     importedCount: number;
@@ -24,6 +25,7 @@ export default function SettingsPage() {
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const [backupBusy, setBackupBusy] = useState(false);
   useEffect(() => {
+    document.querySelector("main")?.scrollTo(0, 0);
     fetch("/api/settings")
       .then((r) => r.json())
       .then(setStatus)
@@ -80,6 +82,29 @@ export default function SettingsPage() {
     window.location.href = "/api/backup/download";
   };
 
+  const useTemporaryKeys = async () => {
+    setSaving(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/settings/demo", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ?? "Temporary keys unavailable");
+      }
+      setMessage("Temporary demo keys saved to your account.");
+      const updated = await fetch("/api/settings").then((r) => r.json());
+      setStatus(updated);
+      const stat = await fetch("/api/status").then((r) => r.json());
+      setAppStatus(stat);
+    } catch (err) {
+      setMessage(
+        err instanceof Error ? err.message : "Could not apply temporary keys.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const saveKeys = async () => {
     setSaving(true);
     setMessage(null);
@@ -97,7 +122,7 @@ export default function SettingsPage() {
 
       setTmdbApiKey("");
       setOmdbApiKey("");
-      setMessage("API keys saved securely on this device.");
+      setMessage("API keys saved to your account.");
       const updated = await fetch("/api/settings").then((r) => r.json());
       setStatus(updated);
       const stat = await fetch("/api/status").then((r) => r.json());
@@ -114,9 +139,103 @@ export default function SettingsPage() {
       <div>
         <h2 className="text-2xl font-bold">Settings</h2>
         <p className="mt-1 text-sm text-muted">
-          Your library is tied to your account. API keys are stored on this server.
+          Your library and API keys are private to your account.
         </p>
       </div>
+
+      <section className="app-panel space-y-4 rounded-2xl p-4">
+        <h3 className="font-semibold">API Keys</h3>
+        {appStatus && !appStatus.keysReady ? (
+          <p className="text-sm text-amber-200/90">
+            Add both keys below to use Discover, search, and the globe.
+          </p>
+        ) : null}
+
+        <div className="space-y-2">
+          <label className="text-xs text-subtle" htmlFor="tmdb">
+            TMDB API Key{" "}
+            {status?.tmdbConfigured ? `(saved ${status.tmdbMasked})` : "(not set)"}
+          </label>
+          <input
+            id="tmdb"
+            type="password"
+            value={tmdbApiKey}
+            onChange={(e) => setTmdbApiKey(e.target.value)}
+            placeholder="Paste TMDB v3 API key"
+            className="app-input w-full rounded-xl border px-3 py-2 text-sm outline-none ring-rose-400/30 focus:ring-2"
+          />
+          <p className="text-xs text-subtle">
+            Get free key at{" "}
+            <a
+              className="text-rose-300 underline"
+              href="https://www.themoviedb.org/settings/api"
+              target="_blank"
+              rel="noreferrer"
+            >
+              themoviedb.org
+            </a>
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs text-subtle" htmlFor="omdb">
+            OMDb API Key{" "}
+            {status?.omdbConfigured ? `(saved ${status.omdbMasked})` : "(not set)"}
+          </label>
+          <input
+            id="omdb"
+            type="password"
+            value={omdbApiKey}
+            onChange={(e) => setOmdbApiKey(e.target.value)}
+            placeholder="Paste OMDb API key"
+            className="app-input w-full rounded-xl border px-3 py-2 text-sm outline-none ring-rose-400/30 focus:ring-2"
+          />
+          <p className="text-xs text-subtle">
+            Get free key at{" "}
+            <a
+              className="text-rose-300 underline"
+              href="https://www.omdbapi.com/apikey.aspx"
+              target="_blank"
+              rel="noreferrer"
+            >
+              omdbapi.com
+            </a>
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={saveKeys}
+            disabled={saving || (!tmdbApiKey.trim() && !omdbApiKey.trim())}
+            className="w-full rounded-xl app-btn-secondary py-2.5 text-sm font-medium disabled:opacity-40"
+          >
+            {saving ? "Saving…" : "Save API Keys"}
+          </button>
+          {status?.demoKeysAvailable ? (
+            <button
+              type="button"
+              onClick={() => void useTemporaryKeys()}
+              disabled={saving}
+              className="w-full rounded-xl border border-amber-400/30 bg-amber-500/10 py-2.5 text-sm font-medium text-amber-100 disabled:opacity-40"
+            >
+              Use temporary keys
+            </button>
+          ) : null}
+        </div>
+
+        {message ? (
+          <p
+            className={`text-sm ${
+              message.includes("unavailable") || message.includes("Could not")
+                ? "text-rose-300"
+                : "text-emerald-300"
+            }`}
+          >
+            {message}
+          </p>
+        ) : null}
+      </section>
 
       <section className="app-panel space-y-3 rounded-2xl p-4">
         <h3 className="font-semibold">Backup library</h3>
@@ -197,73 +316,6 @@ export default function SettingsPage() {
           ) : null}
         </div>
       ) : null}
-
-      <section className="app-panel space-y-4 rounded-2xl p-4">
-        <h3 className="font-semibold">API Keys</h3>
-
-        <div className="space-y-2">
-          <label className="text-xs text-subtle" htmlFor="tmdb">
-            TMDB API Key{" "}
-            {status?.tmdbConfigured ? `(saved ${status.tmdbMasked})` : "(not set)"}
-          </label>
-          <input
-            id="tmdb"
-            type="password"
-            value={tmdbApiKey}
-            onChange={(e) => setTmdbApiKey(e.target.value)}
-            placeholder="Paste TMDB v3 API key"
-            className="app-input w-full rounded-xl border px-3 py-2 text-sm outline-none ring-rose-400/30 focus:ring-2"
-          />
-          <p className="text-xs text-subtle">
-            Get free key at{" "}
-            <a
-              className="text-rose-300 underline"
-              href="https://www.themoviedb.org/settings/api"
-              target="_blank"
-              rel="noreferrer"
-            >
-              themoviedb.org
-            </a>
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs text-subtle" htmlFor="omdb">
-            OMDb API Key{" "}
-            {status?.omdbConfigured ? `(saved ${status.omdbMasked})` : "(not set)"}
-          </label>
-          <input
-            id="omdb"
-            type="password"
-            value={omdbApiKey}
-            onChange={(e) => setOmdbApiKey(e.target.value)}
-            placeholder="Paste OMDb API key"
-            className="app-input w-full rounded-xl border px-3 py-2 text-sm outline-none ring-rose-400/30 focus:ring-2"
-          />
-          <p className="text-xs text-subtle">
-            Get free key at{" "}
-            <a
-              className="text-rose-300 underline"
-              href="https://www.omdbapi.com/apikey.aspx"
-              target="_blank"
-              rel="noreferrer"
-            >
-              omdbapi.com
-            </a>
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={saveKeys}
-          disabled={saving || (!tmdbApiKey.trim() && !omdbApiKey.trim())}
-          className="w-full rounded-xl app-btn-secondary py-2.5 text-sm font-medium disabled:opacity-40"
-        >
-          {saving ? "Saving…" : "Save API Keys"}
-        </button>
-
-        {message ? <p className="text-sm text-emerald-300">{message}</p> : null}
-      </section>
 
     </div>
   );

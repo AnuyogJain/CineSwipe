@@ -6,6 +6,7 @@ import { mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import * as schema from "./schema";
 import { migrateAuth } from "./migrate-auth";
+import { migrateUserApiKeys } from "./migrate-user-api-keys";
 import { migrateUserScope } from "./migrate-user-scope";
 
 const globalForDb = globalThis as unknown as {
@@ -83,6 +84,7 @@ function initSqlite() {
     `);
     migrateUserScope(sqlite);
     migrateAuth(sqlite);
+    migrateUserApiKeys(sqlite);
     globalForDb.sqlite = sqlite;
     globalForDb.db = drizzle(sqlite, { schema });
   }

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { getGenreMap } from "@/lib/tmdb";
+import { withUser } from "@/lib/api/run-with-user";
 import { normalizeGenreName } from "@/lib/genres";
+import { getGenreMap } from "@/lib/tmdb";
 
-export async function GET() {
+export const GET = withUser(async () => {
   try {
     const map = await getGenreMap();
     const genres = Object.entries(map)
@@ -14,7 +15,8 @@ export async function GET() {
 
     return NextResponse.json({ genres });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to load genres";
+    const message =
+      error instanceof Error ? error.message : "Failed to load genres";
     return NextResponse.json({ error: message }, { status: 400 });
   }
-}
+});

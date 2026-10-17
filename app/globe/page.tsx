@@ -187,8 +187,7 @@ export default function GlobePage() {
 
   const isEmpty = !loading && !isRecommend && (!data || data.stats.total === 0);
   const showStatsPill =
-    !loading &&
-    (isRecommend || Boolean(data && data.stats.mapped > 0));
+    !loading && (isRecommend || Boolean(data && data.stats.mapped > 0));
 
   return (
     <>
@@ -237,7 +236,7 @@ export default function GlobePage() {
               No {activeSource.label.toLowerCase()} movies
             </h2>
             <p className="max-w-sm text-sm text-muted">{activeSource.empty}</p>
-            {source === "viewed" || source === "recommend" ? (
+            {source === "viewed" ? (
               <Link
                 href="/settings"
                 className="rounded-xl bg-rose-500/20 px-4 py-2 text-sm font-medium text-rose-200 ring-1 ring-rose-400/30"

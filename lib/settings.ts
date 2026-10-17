@@ -1,19 +1,22 @@
 import "server-only";
 
 import { eq } from "drizzle-orm";
+import { requestUserId } from "./auth/user-context";
 import { db } from "./db";
-import { appSettings } from "./db/schema";
+import { userApiKeys } from "./db/schema";
 import type { ApiKeys } from "./types";
 
-const TMDB_KEY = "tmdb_api_key";
-const OMDB_KEY = "omdb_api_key";
-
 export async function getApiKeys(): Promise<ApiKeys> {
-  const rows = await db.select().from(appSettings);
-  const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+  const userId = requestUserId();
+  const rows = await db
+    .select()
+    .from(userApiKeys)
+    .where(eq(userApiKeys.userId, userId))
+    .limit(1);
+  const row = rows[0];
   return {
-    tmdbApiKey: map[TMDB_KEY] ?? null,
-    omdbApiKey: map[OMDB_KEY] ?? null,
+    tmdbApiKey: row?.tmdbApiKey ?? null,
+    omdbApiKey: row?.omdbApiKey ?? null,
   };
 }
 
@@ -21,25 +24,46 @@ export async function setApiKeys(keys: {
   tmdbApiKey?: string;
   omdbApiKey?: string;
 }): Promise<void> {
+  const userId = requestUserId();
+  const existing = await db
+    .select()
+    .from(userApiKeys)
+    .where(eq(userApiKeys.userId, userId))
+    .limit(1);
   const now = new Date();
+  const current = existing[0];
+
+  const nextTmdb =
+    keys.tmdbApiKey !== undefined && keys.tmdbApiKey.length > 0
+      ? keys.tmdbApiKey
+      : current?.tmdbApiKey ?? null;
+  const nextOmdb =
+    keys.omdbApiKey !== undefined && keys.omdbApiKey.length > 0
+      ? keys.omdbApiKey
+      : current?.omdbApiKey ?? null;
+
+  if (!current) {
+    if (!nextTmdb && !nextOmdb) return;
+    await db.insert(userApiKeys).values({
+      userId,
+      tmdbApiKey: nextTmdb,
+      omdbApiKey: nextOmdb,
+      updatedAt: now,
+    });
+    return;
+  }
+
+  const patch: Partial<typeof userApiKeys.$inferInsert> = { updatedAt: now };
   if (keys.tmdbApiKey !== undefined && keys.tmdbApiKey.length > 0) {
-    await db
-      .insert(appSettings)
-      .values({ key: TMDB_KEY, value: keys.tmdbApiKey, updatedAt: now })
-      .onConflictDoUpdate({
-        target: appSettings.key,
-        set: { value: keys.tmdbApiKey, updatedAt: now },
-      });
+    patch.tmdbApiKey = keys.tmdbApiKey;
   }
   if (keys.omdbApiKey !== undefined && keys.omdbApiKey.length > 0) {
-    await db
-      .insert(appSettings)
-      .values({ key: OMDB_KEY, value: keys.omdbApiKey, updatedAt: now })
-      .onConflictDoUpdate({
-        target: appSettings.key,
-        set: { value: keys.omdbApiKey, updatedAt: now },
-      });
+    patch.omdbApiKey = keys.omdbApiKey;
   }
+
+  if (Object.keys(patch).length <= 1) return;
+
+  await db.update(userApiKeys).set(patch).where(eq(userApiKeys.userId, userId));
 }
 
 export async function hasRequiredKeys(): Promise<boolean> {
