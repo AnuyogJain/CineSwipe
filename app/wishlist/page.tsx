@@ -7,7 +7,11 @@ import {
   filterMoviesByListFilters,
   type ListFilters,
 } from "@/lib/list-filters";
+import { movieLeftListTab } from "@/lib/handle-list-state-change";
+import type { MovieListState } from "@/lib/movie-list-state";
 import type { MovieCandidate } from "@/lib/types";
+
+const TAB_LIST_STATE: MovieListState = "wishlist";
 import { MovieGrid } from "@/components/MovieGrid";
 
 export default function WishlistPage() {
@@ -93,7 +97,17 @@ export default function WishlistPage() {
         onDelete={handleDelete}
         onSelectMovie={setSelected}
       />
-      <MovieDetailPanel movie={selected} onClose={() => setSelected(null)} />
+      <MovieDetailPanel
+        movie={selected}
+        onListStateChange={({ tmdbId, state }) => {
+          void load();
+          if (movieLeftListTab(TAB_LIST_STATE, state)) {
+            setMovies((prev) => prev.filter((m) => m.tmdbId !== tmdbId));
+            setSelected(null);
+          }
+        }}
+        onClose={() => setSelected(null)}
+      />
     </div>
   );
 }

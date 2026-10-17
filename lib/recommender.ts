@@ -8,7 +8,8 @@ import {
   normalizeCountryCodes,
   rowMatchesCountryFilter,
 } from "./list-filters";
-import { getTasteProfile, rebuildTasteProfile } from "./taste-profile";
+import type { MovieListState } from "./movie-list-state";
+import { getTasteProfile, rebuildTasteProfile, updateTasteProfileFromSwipe } from "./taste-profile";
 import {
   discoverMovies,
   findTmdbIdByImdbId,
@@ -1084,6 +1085,163 @@ function parseImdbVotes(votes: string | null | undefined): number | null {
   if (!votes) return null;
   const n = Number.parseInt(String(votes).replace(/,/g, ""), 10);
   return Number.isFinite(n) ? n : null;
+}
+
+export async function getMovieSwipeStatus(tmdbId: number): Promise<{
+  inLiked: boolean;
+  inWishlist: boolean;
+}> {
+  const rows = await db
+    .select({ action: swipeActions.action })
+    .from(swipeActions)
+    .where(eq(swipeActions.tmdbId, tmdbId));
+
+  return {
+    inLiked: rows.some((r) => r.action === "like"),
+    inWishlist: rows.some((r) => r.action === "wishlist"),
+  };
+}
+
+export async function getMovieListState(tmdbId: number): Promise<MovieListState> {
+  const [watched, swipe] = await Promise.all([
+    isMovieInWatchedLibrary(tmdbId),
+    getMovieSwipeStatus(tmdbId),
+  ]);
+  if (watched) return "watched";
+  if (swipe.inWishlist) return "wishlist";
+  if (swipe.inLiked) return "liked";
+  return "none";
+}
+
+async function candidateForListAction(
+  tmdbId: number,
+  payload?: MovieCandidate,
+): Promise<MovieCandidate> {
+  if (payload?.tmdbId === tmdbId && payload.title) {
+    return payload;
+  }
+
+  const movie = await getEnrichedMovie(tmdbId);
+  const imdb = await getImdbRatingForMovie(tmdbId, movie.imdbId).catch(() => ({
+    imdbRating: null as number | null,
+    imdbVotes: null as string | null,
+  }));
+
+  return {
+    tmdbId: movie.tmdbId,
+    imdbId: movie.imdbId,
+    title: movie.title,
+    originalTitle: movie.originalTitle,
+    originalLanguage: movie.originalLanguage,
+    overview: movie.overview,
+    tagline: movie.tagline,
+    year: movie.year,
+    runtime: movie.runtime,
+    genres: movie.genres,
+    genreIds: movie.genreIds,
+    posterPath: movie.posterPath,
+    backdropPath: movie.backdropPath,
+    images: movie.images,
+    imdbRating: imdb.imdbRating,
+    imdbVotes: imdb.imdbVotes,
+    yourRating: null,
+    matchScore: payload?.matchScore ?? 0,
+    matchPercent: toMatchPercent(payload?.matchScore ?? 0),
+    director: movie.director,
+    writers: movie.writers,
+    releaseDate: movie.releaseDate,
+    status: movie.status,
+    countries: movie.countries,
+    countryCodes: movie.countryCodes,
+    cast: movie.cast,
+  };
+}
+
+async function insertSwipeListAction(
+  action: "like" | "wishlist",
+  candidate: MovieCandidate,
+): Promise<void> {
+  const existing = await db
+    .select({ id: swipeActions.id })
+    .from(swipeActions)
+    .where(
+      and(
+        eq(swipeActions.tmdbId, candidate.tmdbId),
+        eq(swipeActions.action, action),
+      ),
+    )
+    .limit(1);
+
+  if (existing.length === 0) {
+    await db.insert(swipeActions).values({
+      tmdbId: candidate.tmdbId,
+      imdbId: candidate.imdbId ?? null,
+      title: candidate.title,
+      action,
+      matchScore: candidate.matchScore ?? null,
+      payload: JSON.stringify(candidate),
+      createdAt: new Date(),
+    });
+  }
+
+  if (action === "wishlist") {
+    await removeFromLiked(candidate.tmdbId);
+  }
+
+  await updateTasteProfileFromSwipe(
+    {
+      genres: candidate.genres,
+      director: candidate.director,
+      cast: candidate.cast.map((c) => c.name),
+      year: candidate.year,
+      runtime: candidate.runtime,
+    },
+    action,
+  );
+}
+
+export async function setMovieListState(
+  tmdbId: number,
+  target: MovieListState,
+  payload?: MovieCandidate,
+): Promise<{ ok: true; state: MovieListState } | { ok: false; error: string }> {
+  const current = await getMovieListState(tmdbId);
+  if (current === target) {
+    return { ok: true, state: target };
+  }
+
+  await removeFromLiked(tmdbId);
+  await removeFromWishlist(tmdbId);
+  await removeFromWatched(tmdbId);
+
+  if (target === "none") {
+    return { ok: true, state: "none" };
+  }
+
+  try {
+    if (target === "watched") {
+      await markMovieAsWatched(tmdbId);
+      return { ok: true, state: "watched" };
+    }
+
+    const candidate = await candidateForListAction(tmdbId, payload);
+
+    if (target === "liked") {
+      await insertSwipeListAction("like", candidate);
+      return { ok: true, state: "liked" };
+    }
+
+    if (target === "wishlist") {
+      await insertSwipeListAction("wishlist", candidate);
+      return { ok: true, state: "wishlist" };
+    }
+
+    return { ok: false, error: "Invalid list state" };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to update list state";
+    return { ok: false, error: message };
+  }
 }
 
 export async function isMovieInWatchedLibrary(

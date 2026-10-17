@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { ListPageActions } from "@/components/ListPageActions";
 import type { ListFilters } from "@/lib/list-filters";
+import { movieLeftListTab } from "@/lib/handle-list-state-change";
+import type { MovieListState } from "@/lib/movie-list-state";
 import type { MovieCandidate } from "@/lib/types";
+
+const TAB_LIST_STATE: MovieListState = "watched";
 import { ListPagination } from "@/components/ListPagination";
 import { MovieDetailPanel } from "@/components/MovieDetailPanel";
 import { MovieGrid } from "@/components/MovieGrid";
@@ -165,7 +169,18 @@ export default function WatchedPage() {
           />
         </>
       )}
-      <MovieDetailPanel movie={selected} onClose={() => setSelected(null)} />
+      <MovieDetailPanel
+        movie={selected}
+        onListStateChange={({ tmdbId, state }) => {
+          void loadPage(page);
+          if (movieLeftListTab(TAB_LIST_STATE, state)) {
+            setMovies((prev) => prev.filter((m) => m.tmdbId !== tmdbId));
+            setTotal((prev) => Math.max(0, prev - 1));
+            setSelected(null);
+          }
+        }}
+        onClose={() => setSelected(null)}
+      />
     </div>
   );
 }

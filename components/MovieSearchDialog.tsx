@@ -147,7 +147,7 @@ export function MovieSearchDialog({ open, onClose }: MovieSearchDialogProps) {
                                   title: hit.title,
                                   year: hit.year,
                                   posterPath: hit.posterPath,
-                                }),
+                                })
                               )
                             }
                             className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-white/8"
@@ -187,7 +187,10 @@ export function MovieSearchDialog({ open, onClose }: MovieSearchDialogProps) {
         ) : null}
       </AnimatePresence>
 
-      <MovieDetailPanel movie={selected} onClose={() => setSelected(null)} />
+      <MovieDetailPanel
+        movie={selected}
+        onClose={() => setSelected(null)}
+      />
     </>
   );
 }

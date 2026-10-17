@@ -1,9 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { Eye, iconHeaderClass } from "@/components/icons";
-import { markMovieWatched } from "@/lib/mark-watched-client";
+import { MovieListStateSelect } from "@/components/MovieListStateSelect";
+import {
+  resolveMovieListState,
+  type MovieListState,
+} from "@/lib/movie-list-state";
+import { setMovieListStateClient } from "@/lib/set-movie-list-state-client";
 import { motion, AnimatePresence } from "framer-motion";
 import type { GlobeMovieDetail } from "@/lib/globe-types";
 import { movieCarouselImages, posterUrl } from "@/lib/images";
@@ -16,6 +21,12 @@ export interface MovieDetailPanelProps {
   onClose: () => void;
   /** Small label above title in header (e.g. country on globe) */
   headerContext?: string;
+  /** Discover hides this; all other detail views show the list dropdown */
+  showListStatePicker?: boolean;
+  onListStateChange?: (info: {
+    tmdbId: number;
+    state: MovieListState;
+  }) => void;
 }
 
 function formatRuntime(minutes: number | null) {
@@ -126,17 +137,65 @@ function IconButton({
   );
 }
 
+function mergeListPayload(
+  movie: MovieCandidate,
+  detail: GlobeMovieDetail,
+): MovieCandidate {
+  return {
+    ...movie,
+    tmdbId: detail.tmdbId,
+    imdbId: detail.imdbId ?? movie.imdbId,
+    title: detail.title,
+    originalTitle: detail.originalTitle,
+    originalLanguage: detail.originalLanguage,
+    overview: detail.overview,
+    tagline: detail.tagline,
+    year: detail.year,
+    runtime: detail.runtime,
+    genres: detail.genres,
+    genreIds: detail.genreIds,
+    posterPath: detail.posterPath,
+    backdropPath: detail.backdropPath,
+    images:
+      detail.images.length > 0 ? detail.images : movie.images,
+    director: detail.director,
+    writers: detail.writers,
+    countries: detail.countries,
+    cast: detail.cast,
+    releaseDate: detail.releaseDate,
+    status: detail.status,
+    imdbRating: detail.imdbRating ?? movie.imdbRating,
+    imdbVotes: detail.imdbVotes ?? movie.imdbVotes,
+    matchScore: movie.matchScore ?? 0,
+    matchPercent: movie.matchPercent ?? 0,
+    yourRating: detail.yourRating ?? movie.yourRating,
+  };
+}
+
+function applyListStateFlags(
+  state: MovieListState,
+): { inLiked: boolean; inWishlist: boolean; inWatched: boolean } {
+  return {
+    inLiked: state === "liked",
+    inWishlist: state === "wishlist",
+    inWatched: state === "watched",
+  };
+}
+
 export function MovieDetailPanel({
   movie,
   onClose,
   headerContext,
+  showListStatePicker = true,
+  onListStateChange,
 }: MovieDetailPanelProps) {
+  const router = useRouter();
   const [detail, setDetail] = useState<GlobeMovieDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageIndex, setImageIndex] = useState(0);
-  const [watchedBusy, setWatchedBusy] = useState(false);
-  const [inWatchedLibrary, setInWatchedLibrary] = useState(false);
+  const [actionsBusy, setActionsBusy] = useState(false);
+  const [listState, setListState] = useState<MovieListState>("none");
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -162,12 +221,12 @@ export function MovieDetailPanel({
     setLoading(true);
     setError(null);
     setImageIndex(0);
-    setInWatchedLibrary(false);
-    setWatchedBusy(false);
+    setListState("none");
+    setActionsBusy(false);
 
     if (!movie.tmdbId) {
       setDetail(candidateToDetail(movie));
-      setInWatchedLibrary(Boolean(movie.yourRating != null));
+      setListState(movie.yourRating != null ? "watched" : "none");
       setLoading(false);
       return () => {
         cancelled = true;
@@ -185,12 +244,26 @@ export function MovieDetailPanel({
             yourRating: data.yourRating ?? movie.yourRating,
             inWatchedLibrary: Boolean(data.inWatchedLibrary),
           });
-          setInWatchedLibrary(Boolean(data.inWatchedLibrary));
+          const flags = applyListStateFlags(
+            (data.listState as MovieListState | undefined) ??
+              resolveMovieListState({
+                inLiked: Boolean(data.inLiked),
+                inWishlist: Boolean(data.inWishlist),
+                inWatched: Boolean(data.inWatchedLibrary),
+              }),
+          );
+          setListState(
+            resolveMovieListState({
+              inLiked: flags.inLiked,
+              inWishlist: flags.inWishlist,
+              inWatched: flags.inWatched,
+            }),
+          );
         }
       } catch (err) {
         if (!cancelled) {
           setDetail(candidateToDetail(movie));
-          setInWatchedLibrary(Boolean(movie.yourRating != null));
+          setListState(movie.yourRating != null ? "watched" : "none");
           setError(
             err instanceof Error ? err.message : "Failed to load full details"
           );
@@ -224,21 +297,47 @@ export function MovieDetailPanel({
   const contextLabel =
     headerContext ?? (movie?.year ? String(movie.year) : "Movie");
 
-  const watchedActive = inWatchedLibrary || Boolean(detail?.inWatchedLibrary);
+  const handleCastSelect = useCallback(
+    (member: { id: number; name: string }) => {
+      onClose();
+      const params = new URLSearchParams({
+        castId: String(member.id),
+        castName: member.name,
+      });
+      router.push(`/discover?${params.toString()}`);
+    },
+    [onClose, router],
+  );
 
-  const handleMarkWatched = async () => {
-    if (!movie?.tmdbId || watchedActive || watchedBusy) return;
-    setWatchedBusy(true);
+  const handleListStateChange = async (next: MovieListState) => {
+    if (!movie?.tmdbId || !detail || actionsBusy || next === listState) return;
+    setActionsBusy(true);
+    const previous = listState;
+    setListState(next);
     try {
-      const result = await markMovieWatched(movie.tmdbId);
-      if (result.ok) {
-        setInWatchedLibrary(true);
-        setDetail((prev) =>
-          prev ? { ...prev, inWatchedLibrary: true } : prev,
-        );
+      const result = await setMovieListStateClient(
+        movie.tmdbId,
+        next,
+        mergeListPayload(movie, detail),
+      );
+      if (!result.ok) {
+        setListState(previous);
+        return;
       }
+      const applied = result.state ?? next;
+      setListState(applied);
+      setDetail((prev) =>
+        prev
+          ? {
+              ...prev,
+              inWatchedLibrary: applied === "watched",
+              yourRating: applied === "watched" ? prev.yourRating : null,
+            }
+          : prev,
+      );
+      onListStateChange?.({ tmdbId: movie.tmdbId, state: applied });
     } finally {
-      setWatchedBusy(false);
+      setActionsBusy(false);
     }
   };
 
@@ -381,32 +480,14 @@ export function MovieDetailPanel({
                         >
                           {detail.title}
                         </h2>
-                        <button
-                          type="button"
-                          disabled={!movie?.tmdbId || watchedActive || watchedBusy}
-                          onClick={() => void handleMarkWatched()}
-                          aria-label={
-                            watchedActive
-                              ? detail.yourRating != null
-                                ? `In watched · your rating ${detail.yourRating} out of 10`
-                                : "In watched library"
-                              : "Mark as watched"
-                          }
-                          title={
-                            watchedActive
-                              ? detail.yourRating != null
-                                ? `Watched · ${detail.yourRating}/10`
-                                : "In watched"
-                              : "Mark watched"
-                          }
-                          className={`globe-modal__icon-btn ${
-                            watchedActive
-                              ? "bg-sky-500/15 text-sky-200 ring-1 ring-sky-400/35"
-                              : "text-sky-300/90 ring-1 ring-sky-400/25"
-                          }`}
-                        >
-                          <Eye className={iconHeaderClass} strokeWidth={2} aria-hidden />
-                        </button>
+                        {showListStatePicker ? (
+                          <MovieListStateSelect
+                            value={listState}
+                            busy={actionsBusy}
+                            disabled={!movie.tmdbId}
+                            onChange={(next) => void handleListStateChange(next)}
+                          />
+                        ) : null}
                       </div>
                       {detail.originalTitle &&
                       detail.originalTitle !== detail.title ? (
@@ -497,7 +578,7 @@ export function MovieDetailPanel({
                       </p>
                     </section>
 
-                    <CastRow cast={detail.cast} />
+                    <CastRow cast={detail.cast} onSelect={handleCastSelect} />
                   </div>
                 </>
               ) : null}

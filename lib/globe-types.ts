@@ -65,4 +65,6 @@ export interface GlobeMovieDetail {
   imdbVotes: string | null;
   yourRating: number | null;
   inWatchedLibrary?: boolean;
+  inLiked?: boolean;
+  inWishlist?: boolean;
 }

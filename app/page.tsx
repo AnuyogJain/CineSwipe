@@ -95,7 +95,13 @@ export default function HomePage() {
         </div>
       )}
 
-      <MovieDetailPanel movie={selected} onClose={() => setSelected(null)} />
+      <MovieDetailPanel
+        movie={selected}
+        onListStateChange={() => {
+          void load();
+        }}
+        onClose={() => setSelected(null)}
+      />
     </div>
   );
 }

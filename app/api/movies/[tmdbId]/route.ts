@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { isMovieInWatchedLibrary } from "@/lib/recommender";
+import {
+  getMovieListState,
+  getMovieSwipeStatus,
+  isMovieInWatchedLibrary,
+} from "@/lib/recommender";
 import { getEnrichedMovie } from "@/lib/tmdb";
 import { getImdbRatingForMovie } from "@/lib/omdb";
 import { eq } from "drizzle-orm";
@@ -30,10 +34,11 @@ export async function GET(
       yourRating = imported[0]?.yourRating ?? null;
     }
 
-    const inWatchedLibrary = await isMovieInWatchedLibrary(
-      tmdbId,
-      movie.imdbId,
-    );
+    const [inWatchedLibrary, swipeStatus, listState] = await Promise.all([
+      isMovieInWatchedLibrary(tmdbId, movie.imdbId),
+      getMovieSwipeStatus(tmdbId),
+      getMovieListState(tmdbId),
+    ]);
 
     return NextResponse.json({
       ...movie,
@@ -41,6 +46,9 @@ export async function GET(
       imdbVotes: imdb.imdbVotes,
       yourRating,
       inWatchedLibrary,
+      inLiked: swipeStatus.inLiked,
+      inWishlist: swipeStatus.inWishlist,
+      listState,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to load movie";

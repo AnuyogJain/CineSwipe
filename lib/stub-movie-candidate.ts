@@ -17,7 +17,7 @@ export interface StubMovieCandidateInput {
 
 /** Minimal candidate for MovieDetailPanel — full detail loaded via `/api/movies/[tmdbId]`. */
 export function stubMovieCandidate(
-  input: StubMovieCandidateInput,
+  input: StubMovieCandidateInput
 ): MovieCandidate {
   const size = input.posterImageSize ?? "w500";
   const poster = posterUrl(input.posterPath ?? null, size);

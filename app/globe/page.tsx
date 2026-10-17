@@ -22,10 +22,15 @@ import { stubMovieCandidateFromGlobe } from "@/lib/stub-movie-candidate";
 
 const GlobeScene = dynamic(
   () => import("@/components/GlobeScene").then((m) => m.GlobeScene),
-  { ssr: false, loading: () => null },
+  { ssr: false, loading: () => null }
 );
 
-const SOURCES: Array<{ id: GlobeSource; label: string; empty: string; hint: string }> = [
+const SOURCES: Array<{
+  id: GlobeSource;
+  label: string;
+  empty: string;
+  hint: string;
+}> = [
   {
     id: "viewed",
     label: "Viewed",
@@ -57,7 +62,9 @@ export default function GlobePage() {
   const [data, setData] = useState<GlobeDataset | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCountry, setSelectedCountry] = useState<GlobeCountry | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<GlobeCountry | null>(
+    null
+  );
   const [selectedMovie, setSelectedMovie] = useState<GlobeMovie | null>(null);
 
   const isRecommend = source === "recommend";
@@ -71,7 +78,7 @@ export default function GlobePage() {
       const res = await fetchWithTimeout(
         `/api/globe?source=${nextSource}`,
         undefined,
-        GLOBE_CLIENT_TIMEOUT_MS,
+        GLOBE_CLIENT_TIMEOUT_MS
       );
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to load globe");
@@ -82,8 +89,8 @@ export default function GlobePage() {
         err instanceof TimeoutError
           ? "Loading took too long. Check your API keys in Settings or tap Retry."
           : err instanceof Error
-            ? err.message
-            : "Failed to load globe",
+          ? err.message
+          : "Failed to load globe"
       );
     } finally {
       setLoading(false);
@@ -92,7 +99,7 @@ export default function GlobePage() {
 
   useEffect(() => {
     const fromUrl = parseGlobeSource(
-      new URLSearchParams(window.location.search).get("source"),
+      new URLSearchParams(window.location.search).get("source")
     );
     setSource(fromUrl);
   }, []);
@@ -122,9 +129,8 @@ export default function GlobePage() {
   const activeSource = SOURCES.find((s) => s.id === source) ?? SOURCES[0];
 
   const selectedGlobeCandidate = useMemo(
-    () =>
-      selectedMovie ? stubMovieCandidateFromGlobe(selectedMovie) : null,
-    [selectedMovie],
+    () => (selectedMovie ? stubMovieCandidateFromGlobe(selectedMovie) : null),
+    [selectedMovie]
   );
 
   const sourceSwitcher = (
@@ -143,7 +149,9 @@ export default function GlobePage() {
             aria-selected={active}
             disabled={loading && active}
             onClick={() => setSource(option.id)}
-            className={`globe-source-switcher__btn${active ? " globe-source-switcher__btn--active" : ""}`}
+            className={`globe-source-switcher__btn${
+              active ? " globe-source-switcher__btn--active" : ""
+            }`}
           >
             {option.label}
           </button>
@@ -181,8 +189,7 @@ export default function GlobePage() {
     );
   }
 
-  const isEmpty =
-    !loading && !isRecommend && (!data || data.stats.total === 0);
+  const isEmpty = !loading && !isRecommend && (!data || data.stats.total === 0);
 
   return (
     <>
@@ -195,10 +202,10 @@ export default function GlobePage() {
                 isRecommend
                   ? "Loading country discover map…"
                   : source === "viewed"
-                    ? "Mapping your library to the world…"
-                    : source === "liked"
-                      ? "Mapping liked movies…"
-                      : "Mapping wishlist movies…"
+                  ? "Mapping your library to the world…"
+                  : source === "liked"
+                  ? "Mapping liked movies…"
+                  : "Mapping wishlist movies…"
               }
             />
           </div>
@@ -216,8 +223,14 @@ export default function GlobePage() {
 
         {isEmpty ? (
           <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-3 px-6 text-center">
-            <Globe className="h-12 w-12 text-muted" strokeWidth={1.5} aria-hidden />
-            <h2 className="text-xl font-bold">No {activeSource.label.toLowerCase()} movies</h2>
+            <Globe
+              className="h-12 w-12 text-muted"
+              strokeWidth={1.5}
+              aria-hidden
+            />
+            <h2 className="text-xl font-bold">
+              No {activeSource.label.toLowerCase()} movies
+            </h2>
             <p className="max-w-sm text-sm text-muted">{activeSource.empty}</p>
             {source === "viewed" ? (
               <Link
@@ -249,9 +262,13 @@ export default function GlobePage() {
               </>
             ) : data && data.stats.mapped > 0 ? (
               <>
-                <span className="font-semibold text-rose-500">{data.stats.mapped}</span>{" "}
+                <span className="font-semibold text-rose-500">
+                  {data.stats.mapped}
+                </span>{" "}
                 {activeSource.label.toLowerCase()} movies across{" "}
-                <span className="font-semibold text-amber-500">{data.countries.length}</span>{" "}
+                <span className="font-semibold text-amber-500">
+                  {data.countries.length}
+                </span>{" "}
                 countries
                 {source === "viewed" && data.stats.excludedNonMovies > 0 ? (
                   <span className="block text-[10px] opacity-70">
@@ -295,6 +312,7 @@ export default function GlobePage() {
         <MovieDetailPanel
           movie={selectedGlobeCandidate}
           headerContext={selectedMovie?.countryName}
+          showListStatePicker={false}
           onClose={() => setSelectedMovie(null)}
         />
       ) : null}
