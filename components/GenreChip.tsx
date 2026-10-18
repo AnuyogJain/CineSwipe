@@ -5,7 +5,12 @@ interface GenreChipProps {
   onClick?: () => void;
 }
 
-export function GenreChip({ label, active, highlight, onClick }: GenreChipProps) {
+export function GenreChip({
+  label,
+  active,
+  highlight,
+  onClick,
+}: GenreChipProps) {
   return (
     <button
       type="button"
@@ -17,8 +22,8 @@ export function GenreChip({ label, active, highlight, onClick }: GenreChipProps)
         active
           ? "bg-[var(--accent-soft)] text-accent-text ring-1 ring-[var(--accent)]/40"
           : highlight
-            ? "bg-[rgb(245_197_24/0.12)] text-[var(--cinema-gold)] ring-1 ring-[rgb(245_197_24/0.35)] hover:brightness-110"
-            : "bg-[var(--pill-bg)] text-muted ring-1 ring-[var(--border-subtle)] hover:bg-[var(--surface-hover)]"
+          ? "bg-[rgb(245_197_24/0.12)] text-[var(--cinema-gold)] ring-1 ring-[rgb(245_197_24/0.35)] hover:brightness-110"
+          : "bg-[var(--pill-bg)] text-muted ring-1 ring-[var(--border-subtle)] hover:bg-[var(--surface-hover)]"
       }`}
     >
       {label}

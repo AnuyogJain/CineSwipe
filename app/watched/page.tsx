@@ -131,9 +131,7 @@ export default function WatchedPage() {
       {movies.length === 0 && !loading ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
           {filtersActive ? (
-            <p className="text-muted">
-              No watched titles match these filters.
-            </p>
+            <p className="text-muted">No watched titles match these filters.</p>
           ) : (
             <>
               <p className="text-muted">

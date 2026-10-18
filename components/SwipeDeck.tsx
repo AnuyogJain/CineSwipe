@@ -43,7 +43,9 @@ function DiscoverDeckShell({
   return (
     <div className="relative flex h-full min-h-0 flex-1 flex-col gap-2 pb-2 pt-2">
       {toolbar ? (
-        <div className="discover-toolbar-slot relative z-40 shrink-0">{toolbar}</div>
+        <div className="discover-toolbar-slot relative z-40 shrink-0">
+          {toolbar}
+        </div>
       ) : null}
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
         {overlay}

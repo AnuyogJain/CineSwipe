@@ -53,7 +53,7 @@ export function MovieCard({
     [
       "0 0 0 rgba(52,211,153,0)",
       "0 0 28px rgba(52,211,153,0.95), 0 0 56px rgba(16,185,129,0.45)",
-    ],
+    ]
   );
   const nopeGlow = useTransform(
     nopeOpacity,
@@ -61,7 +61,7 @@ export function MovieCard({
     [
       "0 0 0 rgba(251,113,133,0)",
       "0 0 28px rgba(251,113,133,0.95), 0 0 56px rgba(244,63,94,0.45)",
-    ],
+    ]
   );
 
   useEffect(() => {
