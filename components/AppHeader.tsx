@@ -1,11 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Search, iconHeaderClass } from "@/components/icons";
+import { Film, Search, iconHeaderClass } from "@/components/icons";
+import { CinedleAboutDialog } from "./CinedleAboutDialog";
 import { MovieSearchDialog } from "./MovieSearchDialog";
 import { UserMenu } from "./UserMenu";
 
-export function AppHeader() {
+interface AppHeaderProps {
+  cinedleAppUrl: string | null;
+}
+
+export function AppHeader({ cinedleAppUrl }: AppHeaderProps) {
+  const [cinedleOpen, setCinedleOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
@@ -19,6 +25,15 @@ export function AppHeader() {
           <div className="flex items-center gap-2">
             <button
               type="button"
+              aria-label="About Cinedle"
+              title="Cinedle"
+              onClick={() => setCinedleOpen(true)}
+              className="header-icon-btn glass-panel size-10 p-0 hover:bg-[var(--surface-hover)]"
+            >
+              <Film className={iconHeaderClass} strokeWidth={2} aria-hidden />
+            </button>
+            <button
+              type="button"
               aria-label="Search movies"
               title="Search movies"
               onClick={() => setSearchOpen(true)}
@@ -30,6 +45,11 @@ export function AppHeader() {
           </div>
         </div>
       </header>
+      <CinedleAboutDialog
+        open={cinedleOpen}
+        onClose={() => setCinedleOpen(false)}
+        appUrl={cinedleAppUrl}
+      />
       <MovieSearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );

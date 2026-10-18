@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { getSessionUser } from "@/lib/auth/session";
+import { getCinedleAppUrl } from "@/lib/cinedle";
 
 const AUTH_PATHS = new Set(["/login", "/register"]);
 
@@ -19,9 +20,11 @@ export async function AppShellGate({ children }: { children: ReactNode }) {
     redirect("/login");
   }
 
+  const cinedleAppUrl = getCinedleAppUrl();
+
   return (
     <>
-      <AppHeader />
+      <AppHeader cinedleAppUrl={cinedleAppUrl} />
       <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-y-auto overflow-x-hidden px-3">
         {children}
       </main>
