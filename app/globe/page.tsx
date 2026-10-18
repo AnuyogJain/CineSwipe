@@ -107,9 +107,9 @@ export default function GlobePage() {
 
   useEffect(() => {
     const main = document.querySelector("main");
-    main?.classList.add("max-w-none!", "overflow-visible!", "p-0!");
+    main?.classList.add("!max-w-none", "!overflow-visible", "!p-0");
     return () => {
-      main?.classList.remove("max-w-none!", "overflow-visible!", "p-0!");
+      main?.classList.remove("!max-w-none", "!overflow-visible", "!p-0");
     };
   }, []);
 
@@ -188,10 +188,11 @@ export default function GlobePage() {
   const isEmpty = !loading && !isRecommend && (!data || data.stats.total === 0);
   const showStatsPill =
     !loading && (isRecommend || Boolean(data && data.stats.mapped > 0));
+  const mapChromeVisible = !selectedCountry && !selectedMovie;
 
   return (
     <>
-      <div className="globe-sky fixed inset-0 bottom-14 top-[57px] z-0">
+      <div className="globe-sky globe-sky--app z-0">
         {loading ? (
           <div className="absolute inset-0 z-[2] flex items-center justify-center">
             <LoadingProgress
@@ -254,24 +255,25 @@ export default function GlobePage() {
           </div>
         ) : null}
 
+        {mapChromeVisible ? (
         <div className="pointer-events-none absolute left-0 right-0 top-3 z-10 flex flex-col items-center gap-2 px-4">
           {sourceSwitcher}
           {showStatsPill ? (
-            <div className="globe-chrome__stats rounded-full border px-4 py-2 text-center text-xs shadow-lg backdrop-blur-sm">
+            <div className="globe-chrome__stats rounded-2xl px-4 py-2 text-center text-xs">
               {isRecommend ? (
                 <>
-                  <span className="font-semibold text-rose-500">
+                  <span className="globe-chrome__accent">
                     {data?.countries.length ?? 0}
                   </span>{" "}
                   countries · tap a pin to discover
                 </>
               ) : data && data.stats.mapped > 0 ? (
                 <>
-                  <span className="font-semibold text-rose-500">
+                  <span className="globe-chrome__accent">
                     {data.stats.mapped}
                   </span>{" "}
                   {activeSource.label.toLowerCase()} movies across{" "}
-                  <span className="font-semibold text-amber-500">
+                  <span className="globe-chrome__accent">
                     {data.countries.length}
                   </span>{" "}
                   countries
@@ -290,12 +292,15 @@ export default function GlobePage() {
             </div>
           ) : null}
         </div>
+        ) : null}
 
-        <p className="globe-chrome__hint pointer-events-none absolute bottom-3 left-0 right-0 z-10 text-center text-[10px]">
+        {mapChromeVisible ? (
+        <p className="globe-chrome__hint pointer-events-none absolute left-0 right-0 z-10 text-center text-[10px]">
           {isRecommend
             ? "Tap a country pin to get recommendations from there"
             : "Zoom in to see movies · Tap a dot for details · Tap a country to browse"}
         </p>
+        ) : null}
       </div>
 
       {isRecommend ? (
@@ -317,6 +322,7 @@ export default function GlobePage() {
           movie={selectedGlobeCandidate}
           headerContext={selectedMovie?.countryName}
           showListStatePicker={false}
+          layout="sheet"
           onClose={() => setSelectedMovie(null)}
         />
       ) : null}

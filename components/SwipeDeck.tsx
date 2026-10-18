@@ -41,7 +41,7 @@ function DiscoverDeckShell({
   children: ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden pb-2 pt-2">
+    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-2 overflow-hidden pb-2 pt-2">
       {overlay}
       {toolbar}
       {children}
@@ -60,6 +60,8 @@ interface SwipeDeckProps {
   lockCountries?: boolean;
   /** Show link to globe tab (off when already in globe country discover) */
   showGlobeNavLink?: boolean;
+  /** Globe country sheet — card fills panel edge to edge */
+  edgeToEdge?: boolean;
 }
 
 export function SwipeDeck({
@@ -69,6 +71,7 @@ export function SwipeDeck({
   countryLabel,
   lockCountries = false,
   showGlobeNavLink = true,
+  edgeToEdge = false,
 }: SwipeDeckProps) {
   const [movies, setMovies] = useState<MovieCandidate[]>([]);
   const [index, setIndex] = useState(0);
@@ -628,6 +631,7 @@ export function SwipeDeck({
             activeGenres={genreFilters}
             activeCastId={castFilter?.id}
             disabled={busy || loading}
+            fillPanel={edgeToEdge}
             undoAvailable={canUndoPass}
             onUndo={() => void handleUndoPass()}
             onSwipe={(dir) => (dir === "right" ? handleLike() : handlePass())}

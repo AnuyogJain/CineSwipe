@@ -23,7 +23,7 @@ function featuredImage(movie: MovieCandidate): string | null {
 function buildFeaturedList(
   wishlist: MovieCandidate[],
   liked: MovieCandidate[],
-  watched: MovieCandidate[],
+  watched: MovieCandidate[]
 ): MovieCandidate[] {
   const seen = new Set<number>();
   const out: MovieCandidate[] = [];
@@ -85,7 +85,8 @@ export function HomeFeaturedCarousel({
   } else if (topGenres.length > 0) {
     subtitle = `Picks tuned to ${topGenres.slice(0, 3).join(", ")} and more.`;
   } else if (hasProfile) {
-    subtitle = "Swipe to train your taste — import IMDb CSV anytime for richer picks.";
+    subtitle =
+      "Swipe to train your taste — import IMDb CSV anytime for richer picks.";
   }
 
   return (
@@ -118,7 +119,9 @@ export function HomeFeaturedCarousel({
                       )}
                       <div className="absolute inset-0 hero-backdrop-scrim" />
                       <div
-                        className={`absolute bottom-0 left-0 right-0 p-4 ${slides.length > 1 ? "pb-9" : ""}`}
+                        className={`absolute bottom-0 left-0 right-0 p-4 ${
+                          slides.length > 1 ? "pb-9" : ""
+                        }`}
                       >
                         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--cinema-gold)]">
                           Featured
@@ -176,7 +179,9 @@ export function HomeFeaturedCarousel({
         </div>
       )}
 
-      <p className="mt-3 px-1 text-sm leading-relaxed text-subtle">{subtitle}</p>
+      <p className="mt-3 px-1 text-sm leading-relaxed text-subtle">
+        {subtitle}
+      </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <GlassButton href={discoverHref} variant="gold">
           <Clapperboard className="h-4 w-4" aria-hidden />

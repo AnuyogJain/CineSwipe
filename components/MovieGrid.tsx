@@ -33,7 +33,7 @@ export function MovieGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-3 px-1 p-4 sm:grid-cols-3">
       {movies.map((movie) => {
         const image = movie.images[0];
         return (

@@ -22,7 +22,7 @@ export async function AppShellGate({ children }: { children: ReactNode }) {
   return (
     <>
       <AppHeader />
-      <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-y-auto overflow-x-hidden">
+      <main className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-y-auto overflow-x-hidden px-3">
         {children}
       </main>
       <BottomNav />
