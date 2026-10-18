@@ -12,10 +12,7 @@ import type { GlobeMovieDetail } from "@/lib/globe-types";
 import type { MovieCandidate } from "@/lib/types";
 import { actionSideButtonClass } from "./ActionBar";
 import { X, iconActionClass } from "@/components/icons";
-import {
-  MovieProfileSkeleton,
-  MovieProfileView,
-} from "./MovieProfileView";
+import { MovieProfileSkeleton, MovieProfileView } from "./MovieProfileView";
 
 export interface MovieDetailPanelProps {
   movie: MovieCandidate | null;
@@ -57,7 +54,7 @@ function candidateToDetail(movie: MovieCandidate): GlobeMovieDetail {
 
 function mergeListPayload(
   movie: MovieCandidate,
-  detail: GlobeMovieDetail,
+  detail: GlobeMovieDetail
 ): MovieCandidate {
   return {
     ...movie,
@@ -121,7 +118,7 @@ export function MovieDetailPanel({
     (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     },
-    [onClose],
+    [onClose]
   );
 
   useEffect(() => {
@@ -169,14 +166,14 @@ export function MovieDetailPanel({
                 inLiked: Boolean(data.inLiked),
                 inWishlist: Boolean(data.inWishlist),
                 inWatched: Boolean(data.inWatchedLibrary),
-              }),
+              })
           );
           setListState(
             resolveMovieListState({
               inLiked: flags.inLiked,
               inWishlist: flags.inWishlist,
               inWatched: flags.inWatched,
-            }),
+            })
           );
         }
       } catch (err) {
@@ -184,7 +181,7 @@ export function MovieDetailPanel({
           setDetail(candidateToDetail(movie));
           setListState(movie.yourRating != null ? "watched" : "none");
           setError(
-            err instanceof Error ? err.message : "Failed to load full details",
+            err instanceof Error ? err.message : "Failed to load full details"
           );
         }
       } finally {
@@ -212,7 +209,7 @@ export function MovieDetailPanel({
       });
       router.push(`/discover?${params.toString()}`);
     },
-    [onClose, router],
+    [onClose, router]
   );
 
   const handleListStateChange = async (next: MovieListState) => {
@@ -224,7 +221,7 @@ export function MovieDetailPanel({
       const result = await setMovieListStateClient(
         movie.tmdbId,
         next,
-        mergeListPayload(movie, detail),
+        mergeListPayload(movie, detail)
       );
       if (!result.ok) {
         setListState(previous);
@@ -239,7 +236,7 @@ export function MovieDetailPanel({
               inWatchedLibrary: applied === "watched",
               yourRating: applied === "watched" ? prev.yourRating : null,
             }
-          : prev,
+          : prev
       );
       onListStateChange?.({ tmdbId: movie.tmdbId, state: applied });
     } finally {
