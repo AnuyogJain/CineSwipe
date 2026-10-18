@@ -1,14 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { HomeFeaturedCarousel } from "@/components/HomeFeaturedCarousel";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { HomeMovieRow } from "@/components/HomeMovieRow";
 import { MovieDetailPanel } from "@/components/MovieDetailPanel";
 import type { MovieCandidate } from "@/lib/types";
 import { HomeDiscoverHero } from "@/components/HomeDiscoverHero";
 import { LoadingProgress } from "@/components/LoadingProgress";
+import { fetchMovieCandidateByTmdbId } from "@/lib/fetch-movie-candidate-client";
 
-export default function HomePage() {
+function HomePageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const deepLinkTmdbId = searchParams.get("tmdbId");
+
   const [liked, setLiked] = useState<MovieCandidate[]>([]);
   const [wishlist, setWishlist] = useState<MovieCandidate[]>([]);
   const [watched, setWatched] = useState<MovieCandidate[]>([]);
@@ -59,6 +64,29 @@ export default function HomePage() {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    const raw = deepLinkTmdbId?.trim();
+    if (!raw) return;
+    const tmdbId = Number(raw);
+    if (!Number.isFinite(tmdbId) || tmdbId <= 0) return;
+
+    let cancelled = false;
+    void fetchMovieCandidateByTmdbId(tmdbId).then((movie) => {
+      if (!cancelled && movie) setSelected(movie);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [deepLinkTmdbId]);
+
+  const closeDetail = useCallback(() => {
+    setSelected(null);
+    if (deepLinkTmdbId) {
+      router.replace("/", { scroll: false });
+    }
+  }, [deepLinkTmdbId, router]);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4 scrollbar-hide">
       <div className="pt-3">
@@ -104,8 +132,22 @@ export default function HomePage() {
         onListStateChange={() => {
           void load();
         }}
-        onClose={() => setSelected(null)}
+        onClose={closeDetail}
       />
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-1 items-center justify-center p-8">
+          <LoadingProgress active label="Loading home…" compact />
+        </div>
+      }
+    >
+      <HomePageContent />
+    </Suspense>
   );
 }
