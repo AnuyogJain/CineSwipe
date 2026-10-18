@@ -88,7 +88,7 @@ export function MovieProfileView({
           priority
           sizes="(max-width: 768px) 100vw, 420px"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/25 to-black/30 rounded-md" />
+        <div className="profile-hero-scrim absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/25 to-black/30" />
 
         <div className="absolute bottom-0 left-0 right-0 p-4 pb-5">
           <h2
@@ -121,13 +121,13 @@ export function MovieProfileView({
         </div>
       </section>
 
-      <ProfileBlock title="The pitch" aside={pitchAside}>
+      <ProfileBlock title="The pitch" aside={pitchAside} plainMinimal>
         {movie.reason ? (
-          <p className="text-sm leading-relaxed text-emerald-100/95">
+          <p className="profile-pitch text-sm leading-relaxed text-emerald-100/95">
             {movie.reason}
           </p>
         ) : (
-          <p className="text-sm leading-relaxed text-white/70">
+          <p className="text-sm leading-relaxed text-muted">
             {movie.overview
               ? movie.overview.slice(0, 280) +
                 (movie.overview.length > 280 ? "…" : "")
@@ -147,12 +147,12 @@ export function MovieProfileView({
       {extraImages[0] ? (
         <>
           <ProfileStill src={extraImages[0]} />
-          <ProfileBlock title="Quick facts">
+          <ProfileBlock title="Quick facts" plainMinimal>
             <QuickFactsGrid movie={movie} />
           </ProfileBlock>
         </>
       ) : (
-        <ProfileBlock title="Quick facts">
+        <ProfileBlock title="Quick facts" plainMinimal>
           <QuickFactsGrid movie={movie} />
         </ProfileBlock>
       )}
@@ -184,14 +184,14 @@ export function MovieProfileView({
         <>
           <ProfileStill src={extraImages[2]} />
           <ProfileBlock title="About the film">
-            <p className="text-sm leading-relaxed text-white/80">
+            <p className="text-sm leading-relaxed text-muted">
               {movie.overview || "No description available."}
             </p>
           </ProfileBlock>
         </>
       ) : (
         <ProfileBlock title="About the film">
-          <p className="text-sm leading-relaxed text-white/80">
+          <p className="text-sm leading-relaxed text-muted">
             {movie.overview || "No description available."}
           </p>
         </ProfileBlock>
@@ -203,10 +203,10 @@ export function MovieProfileView({
         <ProfileBlock title="People">
           {movie.writers && movie.writers.length > 0 ? (
             <div className="mb-4">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle">
                 Writers
               </p>
-              <p className="mt-1 text-sm text-white/75">
+              <p className="mt-1 text-sm text-muted">
                 {movie.writers.join(", ")}
               </p>
             </div>
@@ -224,7 +224,7 @@ export function MovieProfileView({
       ) : null}
 
       {footerHint ? (
-        <p className="px-4 pb-4 text-center text-[11px] text-white/35">
+        <p className="px-4 pb-4 text-center text-[11px] text-subtle">
           {footerHint}
         </p>
       ) : null}
@@ -323,7 +323,7 @@ function ProfileStill({
 }) {
   return (
     <div
-      className={`rounded-md relative aspect-video min-h-[160px] w-full overflow-hidden bg-zinc-900 ${className}`}
+      className={`relative aspect-video min-h-[160px] w-full overflow-hidden bg-zinc-900 ${className}`}
     >
       {src.startsWith("http") ? (
         <Image
@@ -342,14 +342,21 @@ function ProfileStill({
 function ProfileBlock({
   title,
   aside,
+  plainMinimal = false,
   children,
 }: {
   title: string;
   aside?: ReactNode;
+  /** No bordered card in minimalist UI */
+  plainMinimal?: boolean;
   children: ReactNode;
 }) {
   return (
-    <section className="my-3 rounded-md bg-[var(--pill-bg)] px-4 py-4 ring-1 ring-white/8">
+    <section
+      className={`profile-block my-3 rounded-md bg-[var(--pill-bg)] px-4 py-4${
+        plainMinimal ? " profile-block--plain-minimal" : ""
+      }`}
+    >
       <div className="mb-2.5 flex items-start justify-between gap-2">
         <h3 className="font-display text-xs font-bold uppercase tracking-[0.15em] text-[var(--cinema-gold)]">
           {title}
@@ -371,11 +378,13 @@ function DetailItem({
   className?: string;
 }) {
   return (
-    <div className={`rounded-xl bg-black/25 px-3 py-2 ${className}`}>
-      <p className="text-[10px] uppercase tracking-wider text-white/40">
+    <div
+      className={`profile-detail-item rounded-xl bg-black/25 px-3 py-2 ${className}`}
+    >
+      <p className="text-[10px] uppercase tracking-wider text-subtle">
         {label}
       </p>
-      <p className="mt-0.5 text-sm font-medium text-white/85">{value}</p>
+      <p className="mt-0.5 text-sm font-medium text-foreground">{value}</p>
     </div>
   );
 }

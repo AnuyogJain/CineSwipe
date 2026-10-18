@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { LoadingProgress } from "@/components/LoadingProgress";
 import { SwipeDeck } from "@/components/SwipeDeck";
 
 function DiscoverContent() {
@@ -36,8 +37,8 @@ export default function DiscoverPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-1 items-center justify-center text-white/50">
-          Loading…
+        <div className="flex flex-1 items-center justify-center p-8">
+          <LoadingProgress active label="Loading discover…" compact />
         </div>
       }
     >

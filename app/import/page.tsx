@@ -42,12 +42,12 @@ export default function ImportPage() {
         </p>
       </div>
 
-      <label className="glass-panel flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-6 py-12 text-center transition hover:brightness-110">
+      <label className="glass-panel flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-6 py-12 text-center transition hover:brightness-110">
         <span className="text-3xl">📄</span>
-        <span className="text-sm font-medium text-white/80">
+        <span className="text-sm font-medium text-muted">
           {file ? file.name : "Tap to choose CSV file"}
         </span>
-        <span className="text-xs text-white/40">IMDb list export format</span>
+        <span className="text-xs text-subtle">IMDb list export format</span>
         <input
           type="file"
           accept=".csv,text/csv"
@@ -77,13 +77,13 @@ export default function ImportPage() {
             {result.imported} ratings loaded — taste profile ready!
           </p>
           {result.topGenres.length > 0 ? (
-            <p className="text-sm text-white/70">
+            <p className="text-sm text-muted">
               Top genres: {result.topGenres.join(", ")}
             </p>
           ) : null}
           <Link
             href="/discover"
-            className="inline-block rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/15"
+            className="inline-block rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-muted hover:bg-[var(--surface-hover)]"
           >
             Start swiping →
           </Link>

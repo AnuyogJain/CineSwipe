@@ -70,10 +70,10 @@ export function MovieCard({
 
   return (
     <div
-      className={`theme-keep-dark relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-zinc-950 ${
+      className={`theme-keep-dark relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-background ${
         fillPanel
           ? "rounded-none shadow-none ring-0"
-          : "mx-auto rounded-3xl shadow-2xl ring-1 ring-white/10"
+          : "mx-auto rounded-3xl border-2 border-border shadow-lg"
       }`}
     >
       <div className="relative min-h-0 flex-1">
@@ -142,7 +142,7 @@ export function MovieCard({
                   ? "Bring back last passed movie"
                   : "Undo last pass"
               }
-              className={`pointer-events-auto ${actionSideButtonClass} ${
+              className={`pointer-events-auto action-side-btn--undo ${actionSideButtonClass} ${
                 undoAvailable
                   ? "bg-amber-500/15 text-amber-200 ring-amber-400/40 hover:bg-amber-400/10"
                   : "text-amber-300/45 ring-amber-300/20"

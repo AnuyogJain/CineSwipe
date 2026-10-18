@@ -27,54 +27,48 @@ export function ImdbRatingBadge({
   size = "sm",
   compact = false,
 }: ImdbRatingBadgeProps) {
-  const textSize = size === "lg" ? "text-sm" : "text-xs";
-  const starClass = size === "lg" ? "h-4 w-4" : "h-3.5 w-3.5";
   const href = imdbTitleUrl(imdbId);
   const votesLabel = votes ? formatVotesShort(votes) : null;
 
   const badge = (
     <span
-      className={`inline-flex max-w-full flex-nowrap items-center gap-1 rounded-full bg-black/60 py-1 font-medium text-imdb-yellow backdrop-blur-sm ${
-        compact ? "px-2 text-[10px] leading-none" : "px-2.5"
-      } ${
-        href
-          ? "transition hover:bg-black/80 hover:ring-1 hover:ring-imdb-yellow/40"
-          : ""
-      }`}
+      className={[
+        "imdb-rating-badge",
+        size === "lg" ? "imdb-rating-badge--lg" : "",
+        compact ? "imdb-rating-badge--compact" : "",
+        href ? "imdb-rating-badge--interactive" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
-      <Star
-        className={`shrink-0 ${starClass} text-imdb-yellow`}
-        strokeWidth={2}
-        fill="currentColor"
-        aria-hidden
-      />
-      <span className="shrink-0 text-white/90">IMDb</span>
-      <span className="shrink-0 font-semibold tabular-nums text-white">
+      <Star className="imdb-rating-badge__star" strokeWidth={2} fill="currentColor" aria-hidden />
+      <span className="imdb-rating-badge__label">IMDb</span>
+      <span className="imdb-rating-badge__score tabular-nums">
         {rating != null ? rating.toFixed(1) : "N/A"}
       </span>
       {votesLabel ? (
         <span
-          className="min-w-0 shrink truncate text-white/60"
+          className="imdb-rating-badge__votes min-w-0 shrink truncate"
           title={votes ? `${votes} votes` : undefined}
         >
           · {votesLabel}
         </span>
       ) : null}
       {href ? (
-        <ExternalLink
-          className="h-3 w-3 shrink-0 text-white/40"
-          strokeWidth={2}
-          aria-hidden
-        />
+        <ExternalLink className="imdb-rating-badge__link-icon" strokeWidth={2} aria-hidden />
       ) : null}
     </span>
   );
 
   return (
     <div
-      className={`items-center gap-2 ${textSize} ${
-        compact ? "flex min-w-0 max-w-full flex-nowrap" : "flex flex-wrap"
-      }`}
+      className={[
+        "imdb-rating-badge-wrap",
+        size === "lg" ? "imdb-rating-badge-wrap--lg" : "",
+        compact ? "imdb-rating-badge-wrap--compact" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       {href ? (
         <a
@@ -82,7 +76,7 @@ export function ImdbRatingBadge({
           target="_blank"
           rel="noopener noreferrer"
           title="Open on IMDb"
-          className="min-w-0 max-w-full shrink"
+          className="imdb-rating-badge__anchor min-w-0 max-w-full shrink"
         >
           {badge}
         </a>

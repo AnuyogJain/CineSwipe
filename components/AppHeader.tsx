@@ -10,7 +10,7 @@ export function AppHeader() {
 
   return (
     <>
-      <header className="app-header relative z-50 shrink-0 border-b border-[var(--border-subtle)] px-4 py-2.5 backdrop-blur-xl">
+      <header className="app-header shrink-0 border-b border-border bg-[var(--header-bg)] px-4 py-2.5 backdrop-blur-xl">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
           <h1 className="font-display text-xl font-bold leading-none tracking-wide">
             <span className="text-[var(--cinema-gold)]">Cine</span>
@@ -22,7 +22,7 @@ export function AppHeader() {
               aria-label="Search movies"
               title="Search movies"
               onClick={() => setSearchOpen(true)}
-              className="glass-panel flex shrink-0 items-center justify-center rounded-full p-2.5 transition hover:brightness-110"
+              className="header-icon-btn glass-panel size-10 p-0 hover:bg-[var(--surface-hover)]"
             >
               <Search className={iconHeaderClass} strokeWidth={2} aria-hidden />
             </button>

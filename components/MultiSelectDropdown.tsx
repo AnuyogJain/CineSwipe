@@ -69,7 +69,7 @@ export function MultiSelectDropdown({
 
   return (
     <div ref={rootRef} className="relative min-w-0 flex-1">
-      <p className="mb-1 px-0.5 text-[10px] font-medium uppercase tracking-wider text-white/40">
+      <p className="mb-1 px-0.5 text-[10px] font-medium uppercase tracking-wider text-subtle">
         {label}
       </p>
       <button
@@ -82,17 +82,15 @@ export function MultiSelectDropdown({
           if (disabled || readOnly) return;
           setOpen((v) => !v);
         }}
-        className={`flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-sm ring-1 transition disabled:opacity-50 ${
-          selected.length > 0
-            ? "bg-rose-500/15 text-rose-50 ring-rose-400/40"
-            : "bg-white/5 text-white/80 ring-white/10 hover:bg-white/10"
+        className={`select-dropdown-trigger${
+          selected.length > 0 ? " select-dropdown-trigger--selected" : ""
         } ${readOnly ? "cursor-default" : ""}`}
       >
         <span className="truncate">{summary}</span>
         {readOnly ? null : open ? (
-          <ChevronUp className="h-4 w-4 shrink-0 text-white/45" aria-hidden />
+          <ChevronUp className="h-4 w-4 shrink-0 text-subtle" aria-hidden />
         ) : (
-          <ChevronDown className="h-4 w-4 shrink-0 text-white/45" aria-hidden />
+          <ChevronDown className="h-4 w-4 shrink-0 text-subtle" aria-hidden />
         )}
       </button>
 
@@ -101,12 +99,12 @@ export function MultiSelectDropdown({
           id={listId}
           role="listbox"
           aria-multiselectable
-          className="glass-panel absolute left-0 right-0 top-full z-40 mt-1 max-h-56 overflow-y-auto rounded-2xl py-1"
+          className="select-dropdown-menu select-dropdown-menu--down z-40"
         >
           {selected.length > 0 ? (
             <button
               type="button"
-              className="w-full px-3 py-2 text-left text-xs text-white/50 hover:bg-white/5 hover:text-white/80"
+              className="select-dropdown-option text-xs text-subtle"
               onClick={() => onChange([])}
             >
               Clear all
@@ -121,29 +119,18 @@ export function MultiSelectDropdown({
                 role="option"
                 aria-selected={checked}
                 onClick={() => toggle(opt.value)}
-                className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition hover:bg-white/8 ${
-                  checked
-                    ? "bg-rose-500/15 text-rose-100"
-                    : opt.highlight
-                      ? "text-amber-100/90"
-                      : "text-white/80"
+                className={`select-dropdown-option${
+                  checked ? " select-dropdown-option--selected" : ""
                 }`}
               >
-                <span
-                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                    checked
-                      ? "border-rose-400/60 bg-rose-500/40 text-white"
-                      : "border-white/25 bg-transparent"
-                  }`}
-                  aria-hidden
-                >
+                <span className="select-dropdown-check" aria-hidden>
                   {checked ? (
                     <Check className="h-3 w-3" strokeWidth={3} />
                   ) : null}
                 </span>
                 <span className="truncate">{opt.label}</span>
                 {opt.highlight && !checked ? (
-                  <span className="ml-auto shrink-0 text-[9px] uppercase tracking-wide text-amber-400/70">
+                  <span className="ml-auto shrink-0 text-[9px] font-semibold uppercase tracking-wide text-[var(--warning-text)]">
                     taste
                   </span>
                 ) : null}

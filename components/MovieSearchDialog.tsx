@@ -74,7 +74,7 @@ export function MovieSearchDialog({ open, onClose }: MovieSearchDialogProps) {
             <motion.button
               type="button"
               aria-label="Close search"
-              className="fixed inset-0 z-[60] bg-black/55"
+              className="search-dialog-scrim fixed inset-0 z-[60] bg-black/55"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -89,13 +89,13 @@ export function MovieSearchDialog({ open, onClose }: MovieSearchDialogProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
             >
-              <div className="flex items-center gap-2 border-b border-white/10 px-3 py-3">
+              <div className="flex items-center gap-2 border-b border-border px-3 py-3">
                 <label htmlFor={inputId} className="sr-only">
                   Search movies
                 </label>
                 <div className="relative min-w-0 flex-1">
                   <Search
-                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40"
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle"
                     aria-hidden
                   />
                   <input
@@ -106,14 +106,14 @@ export function MovieSearchDialog({ open, onClose }: MovieSearchDialogProps) {
                     placeholder="Movie title…"
                     autoComplete="off"
                     onChange={(e) => setQuery(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-surface py-2.5 pl-10 pr-3 text-sm text-white outline-none ring-rose-400/30 placeholder:text-white/35 focus:ring-1"
+                    className="w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-foreground outline-none ring-rose-400/30 placeholder:text-subtle focus:ring-1"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
                   aria-label="Close"
-                  className="flex shrink-0 items-center justify-center rounded-xl border border-white/10 bg-surface p-2.5 text-white/70 transition hover:bg-white/10"
+                  className="flex shrink-0 items-center justify-center rounded-xl border border-border bg-surface p-2.5 text-muted transition hover:bg-[var(--surface-hover)]"
                 >
                   <X className={iconHeaderClass} strokeWidth={2} aria-hidden />
                 </button>
@@ -121,15 +121,15 @@ export function MovieSearchDialog({ open, onClose }: MovieSearchDialogProps) {
 
               <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
                 {query.trim().length < 2 ? (
-                  <p className="px-1 py-6 text-center text-sm text-white/45">
+                  <p className="px-1 py-6 text-center text-sm text-subtle">
                     Type at least 2 characters to search.
                   </p>
                 ) : loading ? (
-                  <p className="px-1 py-6 text-center text-sm text-white/45">
+                  <p className="px-1 py-6 text-center text-sm text-subtle">
                     Searching…
                   </p>
                 ) : results.length === 0 ? (
-                  <p className="px-1 py-6 text-center text-sm text-white/45">
+                  <p className="px-1 py-6 text-center text-sm text-subtle">
                     No movies found.
                   </p>
                 ) : (
@@ -150,7 +150,7 @@ export function MovieSearchDialog({ open, onClose }: MovieSearchDialogProps) {
                                 })
                               )
                             }
-                            className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-white/8"
+                            className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-[var(--surface-hover)]"
                           >
                             <div className="relative h-14 w-10 shrink-0 overflow-hidden rounded-md bg-zinc-800">
                               {src ? (
@@ -168,10 +168,10 @@ export function MovieSearchDialog({ open, onClose }: MovieSearchDialogProps) {
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate font-medium text-white">
+                              <p className="truncate font-medium text-foreground">
                                 {hit.title}
                               </p>
-                              <p className="text-xs text-white/45">
+                              <p className="text-xs text-subtle">
                                 {hit.year > 0 ? hit.year : "Year unknown"}
                               </p>
                             </div>

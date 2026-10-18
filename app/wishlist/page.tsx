@@ -12,6 +12,7 @@ import type { MovieListState } from "@/lib/movie-list-state";
 import type { MovieCandidate } from "@/lib/types";
 
 const TAB_LIST_STATE: MovieListState = "wishlist";
+import { LoadingProgress } from "@/components/LoadingProgress";
 import { MovieGrid } from "@/components/MovieGrid";
 
 export default function WishlistPage() {
@@ -62,8 +63,8 @@ export default function WishlistPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center text-white/50">
-        Loading wishlist…
+      <div className="flex flex-1 items-center justify-center p-8">
+        <LoadingProgress active label="Loading wishlist…" compact />
       </div>
     );
   }

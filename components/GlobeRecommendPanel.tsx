@@ -36,22 +36,22 @@ export function GlobeRecommendPanel({
         role="dialog"
         aria-modal="true"
         aria-label={`Discover movies from ${country.name}`}
-        className="globe-recommend-deck theme-keep-dark fixed z-[55] flex flex-col overflow-hidden bg-zinc-950"
+        className="globe-recommend-deck fixed flex flex-col overflow-hidden"
         onClick={(event) => event.stopPropagation()}
       >
-        <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-3 py-3">
+        <header className="globe-recommend-deck__header flex shrink-0 items-center justify-between px-3 py-3">
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-wider text-[var(--cinema-gold)]">
+            <p className="globe-recommend-deck__eyebrow">
               Discover · {country.iso}
             </p>
-            <h3 className="truncate font-display text-lg font-bold text-white">
+            <h3 className="globe-recommend-deck__title truncate font-display text-lg font-bold">
               {country.name}
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-full bg-white/10 px-3 py-1.5 text-sm text-white/80 transition hover:bg-white/15"
+            className="globe-recommend-deck__back shrink-0 rounded-full px-3 py-1.5 text-sm transition"
           >
             Back to map
           </button>

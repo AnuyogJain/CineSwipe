@@ -11,6 +11,7 @@ import type { MovieCandidate } from "@/lib/types";
 const TAB_LIST_STATE: MovieListState = "watched";
 import { ListPagination } from "@/components/ListPagination";
 import { MovieDetailPanel } from "@/components/MovieDetailPanel";
+import { LoadingProgress } from "@/components/LoadingProgress";
 import { MovieGrid } from "@/components/MovieGrid";
 
 const PAGE_SIZE = 24;
@@ -99,8 +100,8 @@ export default function WatchedPage() {
 
   if (loading && movies.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-white/50">
-        Loading watched movies…
+      <div className="flex flex-1 items-center justify-center p-8">
+        <LoadingProgress active label="Loading watched movies…" compact />
       </div>
     );
   }
@@ -130,12 +131,12 @@ export default function WatchedPage() {
       {movies.length === 0 && !loading ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
           {filtersActive ? (
-            <p className="text-white/50">
+            <p className="text-muted">
               No watched titles match these filters.
             </p>
           ) : (
             <>
-              <p className="text-white/50">
+              <p className="text-muted">
                 No imported ratings yet. Import your IMDb CSV to see everything
                 you&apos;ve watched.
               </p>

@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0f",
+  themeColor: "#fafafa",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -46,6 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
+      data-ui-mode="minimal"
       data-theme="dark-midnight"
       data-theme-family="dark"
       className={`${geistSans.variable} ${geistMono.variable} ${syne.variable} h-full overflow-hidden antialiased`}

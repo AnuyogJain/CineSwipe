@@ -54,15 +54,15 @@ export default function RegisterPage() {
   return (
     <div className="mx-auto flex w-full flex-col gap-6">
       <div className="text-center">
-        <h1 className="font-display text-2xl font-bold">
-          <span className="text-[var(--cinema-gold)]">Cine</span>Swipe
+        <h1 className="auth-title font-display text-2xl font-bold text-foreground">
+          <span className="auth-title-accent">Cine</span>Swipe
         </h1>
         <p className="mt-2 text-sm text-muted">Create your account</p>
       </div>
 
       <form onSubmit={submit} className="space-y-4">
         {formError ? (
-          <p className="text-sm text-rose-300">{formError}</p>
+          <p className="auth-error text-sm">{formError}</p>
         ) : null}
         <div className="space-y-2">
           <label className="text-xs text-subtle" htmlFor="displayName">
@@ -73,7 +73,7 @@ export default function RegisterPage() {
             autoComplete="name"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="app-input w-full rounded-xl border px-3 py-2 text-sm outline-none ring-rose-400/30 focus:ring-2"
+            className="app-input auth-field w-full rounded-xl border px-3 py-2 text-sm outline-none"
           />
         </div>
         <div className="space-y-2">
@@ -85,7 +85,7 @@ export default function RegisterPage() {
             autoComplete="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="app-input w-full rounded-xl border px-3 py-2 text-sm outline-none ring-rose-400/30 focus:ring-2"
+            className="app-input auth-field w-full rounded-xl border px-3 py-2 text-sm outline-none"
           />
         </div>
         <div className="space-y-2">
@@ -101,10 +101,10 @@ export default function RegisterPage() {
               setPassword(e.target.value);
               setPasswordError(null);
             }}
-            className="app-input w-full rounded-xl border px-3 py-2 text-sm outline-none ring-rose-400/30 focus:ring-2"
+            className="app-input auth-field w-full rounded-xl border px-3 py-2 text-sm outline-none"
           />
           {passwordError ? (
-            <p className="text-xs text-rose-300">{passwordError}</p>
+            <p className="auth-error text-xs">{passwordError}</p>
           ) : (
             <p className="text-[10px] text-subtle">At least 8 characters</p>
           )}
@@ -112,7 +112,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={busy}
-          className="w-full rounded-xl bg-rose-500 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+          className="auth-submit w-full rounded-xl py-2.5 text-sm font-semibold disabled:opacity-50"
         >
           {busy ? "Creating…" : "Create account"}
         </button>
@@ -120,7 +120,7 @@ export default function RegisterPage() {
 
       <p className="text-center text-sm text-muted">
         Already have an account?{" "}
-        <Link href="/login" className="text-rose-300 underline">
+        <Link href="/login" className="auth-link font-medium underline underline-offset-2">
           Sign in
         </Link>
       </p>

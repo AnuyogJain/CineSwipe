@@ -51,13 +51,13 @@ export function UserMenu() {
         aria-controls={listId}
         aria-label="Account menu"
         onClick={() => setOpen((v) => !v)}
-        className="glass-panel flex shrink-0 items-center justify-center gap-1 rounded-full px-3 py-2 transition hover:brightness-110"
+        className="header-icon-btn glass-panel h-10 gap-1 px-3 py-0 hover:bg-[var(--surface-hover)]"
       >
         <User className={iconHeaderClass} strokeWidth={2} aria-hidden />
         {open ? (
-          <ChevronUp className="h-3.5 w-3.5 text-white/45" aria-hidden />
+          <ChevronUp className="h-3.5 w-3.5 text-muted" aria-hidden />
         ) : (
-          <ChevronDown className="h-3.5 w-3.5 text-white/45" aria-hidden />
+          <ChevronDown className="h-3.5 w-3.5 text-muted" aria-hidden />
         )}
       </button>
 
@@ -65,15 +65,15 @@ export function UserMenu() {
         <div
           id={listId}
           role="menu"
-          className="absolute right-0 top-full z-[60] mt-1 min-w-[11rem] overflow-hidden rounded-xl bg-zinc-950 py-1 shadow-xl ring-1 ring-white/15 backdrop-blur-xl"
+          className="glass-panel absolute right-0 top-full z-[60] mt-1 min-w-[11rem] overflow-hidden rounded-xl py-1"
         >
-          <p className="truncate px-3 py-2 text-xs font-medium text-white/90">
+          <p className="truncate px-3 py-2 text-xs font-medium text-foreground">
             {displayName ?? "Account"}
           </p>
           <Link
             href="/settings"
             role="menuitem"
-            className="block px-3 py-2 text-sm text-white/80 transition hover:bg-white/8"
+            className="block px-3 py-2 text-sm text-muted transition hover:bg-[var(--surface-hover)] hover:text-foreground"
             onClick={() => setOpen(false)}
           >
             Settings
@@ -81,7 +81,7 @@ export function UserMenu() {
           <button
             type="button"
             role="menuitem"
-            className="block w-full px-3 py-2 text-left text-sm text-white/80 transition hover:bg-white/8"
+            className="block w-full px-3 py-2 text-left text-sm text-muted transition hover:bg-[var(--surface-hover)] hover:text-foreground"
             onClick={() => void logout()}
           >
             Log out

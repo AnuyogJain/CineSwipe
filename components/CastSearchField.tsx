@@ -63,19 +63,21 @@ export function CastSearchField({
   if (selected) {
     return (
       <div className="min-w-0 flex-1">
-      <div className="flex min-w-0 items-center gap-1 rounded-xl border border-violet-400/35 bg-violet-500/15 px-2 py-1.5 text-xs text-violet-100">
-        <User className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
-        <span className="min-w-0 truncate font-medium">{selected.name}</span>
-        <button
-          type="button"
-          disabled={disabled}
-          aria-label="Clear actor filter"
-          onClick={onClear}
-          className="shrink-0 rounded p-0.5 text-violet-200/80 hover:bg-violet-500/20 hover:text-white disabled:opacity-40"
-        >
-          <X className="h-3.5 w-3.5" aria-hidden />
-        </button>
-      </div>
+        <div className="discover-toolbar-cast-chip">
+          <User className="h-4 w-4 shrink-0 text-muted" aria-hidden />
+          <span className="discover-toolbar-cast-chip__name min-w-0 truncate font-semibold">
+            {selected.name}
+          </span>
+          <button
+            type="button"
+            disabled={disabled}
+            aria-label="Clear actor filter"
+            onClick={onClear}
+            className="discover-toolbar-cast-chip__clear ml-auto shrink-0 rounded-full p-0.5 disabled:opacity-40"
+          >
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
       </div>
     );
   }
@@ -87,7 +89,7 @@ export function CastSearchField({
       </label>
       <div className="relative">
         <Search
-          className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/35"
+          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle"
           aria-hidden
         />
         <input
@@ -102,7 +104,7 @@ export function CastSearchField({
             setQuery(e.target.value);
             setOpen(true);
           }}
-          className="w-full rounded-xl border border-white/10 bg-surface py-2 pl-8 pr-2 text-xs text-white/90 outline-none ring-rose-400/30 placeholder:text-white/35 focus:ring-1 disabled:opacity-50"
+          className="discover-toolbar-input disabled:opacity-50"
         />
       </div>
       {open && results.length > 0 ? (
@@ -114,7 +116,7 @@ export function CastSearchField({
             <li key={person.id}>
               <button
                 type="button"
-                className="w-full px-3 py-2 text-left text-xs text-white/85 hover:bg-white/8"
+                className="w-full px-3 py-2 text-left text-xs text-muted hover:bg-[var(--surface-hover)]"
                 onClick={() => {
                   onSelect({ id: person.id, name: person.name });
                   setQuery("");

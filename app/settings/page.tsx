@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { FileUp } from "@/components/icons";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 export default function SettingsPage() {
@@ -158,6 +159,10 @@ export default function SettingsPage() {
     }
   };
 
+  const messageIsError =
+    message != null &&
+    (message.includes("unavailable") || message.includes("Could not"));
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-4 pb-8">
       <div>
@@ -167,16 +172,16 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <section className="app-panel space-y-4 rounded-2xl p-4">
+      <section className="settings-section space-y-4">
         <h3 className="font-semibold">API Keys</h3>
         {appStatus && !appStatus.keysReady ? (
-          <p className="text-sm text-amber-200/90">
+          <p className="settings-msg--warn">
             Add both keys below to use Discover, search, and the globe.
           </p>
         ) : null}
 
         <div className="space-y-2">
-          <label className="text-xs text-subtle" htmlFor="tmdb">
+          <label className="settings-label" htmlFor="tmdb">
             TMDB API Key{" "}
             {status?.tmdbConfigured ? `(saved ${status.tmdbMasked})` : "(not set)"}
           </label>
@@ -188,10 +193,10 @@ export default function SettingsPage() {
             placeholder="Paste TMDB v3 API key"
             className="app-input w-full rounded-xl border px-3 py-2 text-sm outline-none ring-rose-400/30 focus:ring-2"
           />
-          <p className="text-xs text-subtle">
+          <p className="text-xs text-muted">
             Get free key at{" "}
             <a
-              className="text-rose-300 underline"
+              className="settings-link"
               href="https://www.themoviedb.org/settings/api"
               target="_blank"
               rel="noreferrer"
@@ -202,7 +207,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs text-subtle" htmlFor="omdb">
+          <label className="settings-label" htmlFor="omdb">
             OMDb API Key{" "}
             {status?.omdbConfigured ? `(saved ${status.omdbMasked})` : "(not set)"}
           </label>
@@ -214,10 +219,10 @@ export default function SettingsPage() {
             placeholder="Paste OMDb API key"
             className="app-input w-full rounded-xl border px-3 py-2 text-sm outline-none ring-rose-400/30 focus:ring-2"
           />
-          <p className="text-xs text-subtle">
+          <p className="text-xs text-muted">
             Get free key at{" "}
             <a
-              className="text-rose-300 underline"
+              className="settings-link"
               href="https://www.omdbapi.com/apikey.aspx"
               target="_blank"
               rel="noreferrer"
@@ -232,7 +237,7 @@ export default function SettingsPage() {
             type="button"
             onClick={saveKeys}
             disabled={saving || (!tmdbApiKey.trim() && !omdbApiKey.trim())}
-            className="w-full rounded-xl app-btn-secondary py-2.5 text-sm font-medium disabled:opacity-40"
+            className="settings-btn settings-btn--primary"
           >
             {saving ? "Saving…" : "Save API Keys"}
           </button>
@@ -241,7 +246,7 @@ export default function SettingsPage() {
               type="button"
               onClick={() => void useTemporaryKeys()}
               disabled={saving}
-              className="w-full rounded-xl border border-amber-400/30 bg-amber-500/10 py-2.5 text-sm font-medium text-amber-100 disabled:opacity-40"
+              className="settings-btn settings-btn--warning"
             >
               Use temporary keys
             </button>
@@ -250,18 +255,16 @@ export default function SettingsPage() {
 
         {message ? (
           <p
-            className={`text-sm ${
-              message.includes("unavailable") || message.includes("Could not")
-                ? "text-rose-300"
-                : "text-emerald-300"
-            }`}
+            className={
+              messageIsError ? "settings-msg--err" : "settings-msg--ok"
+            }
           >
             {message}
           </p>
         ) : null}
       </section>
 
-      <section className="glass-panel space-y-3 rounded-2xl p-4">
+      <section className="settings-section space-y-3">
         <h3 className="font-semibold">Backup library</h3>
         <p className="text-sm text-muted">
           Export a CineSwipe CSV (likes, passes, wishlist, ratings, taste). Import
@@ -272,11 +275,11 @@ export default function SettingsPage() {
             type="button"
             disabled={backupBusy}
             onClick={exportBackup}
-            className="w-full rounded-xl app-btn-secondary py-2.5 text-sm font-medium disabled:opacity-40"
+            className="settings-btn"
           >
             Export CSV
           </button>
-          <label className="w-full cursor-pointer rounded-xl border border-white/10 py-2.5 text-center text-sm font-medium transition hover:bg-white/5">
+          <label className="settings-btn cursor-pointer text-center">
             Import CSV (replace)
             <input
               type="file"
@@ -294,7 +297,7 @@ export default function SettingsPage() {
             type="button"
             disabled={backupBusy}
             onClick={() => void uploadServerBackup()}
-            className="w-full rounded-xl bg-rose-500/20 py-2.5 text-sm font-medium text-rose-100 ring-1 ring-rose-400/30 disabled:opacity-40"
+            className="settings-btn settings-btn--danger"
           >
             Backup to server
           </button>
@@ -302,36 +305,33 @@ export default function SettingsPage() {
             type="button"
             disabled={backupBusy}
             onClick={downloadServerBackup}
-            className="w-full rounded-xl app-btn-secondary py-2.5 text-sm font-medium disabled:opacity-40"
+            className="settings-btn"
           >
             Download server backup
           </button>
         </div>
         {backupMessage ? (
-          <p className="text-sm text-emerald-300">{backupMessage}</p>
+          <p className="settings-msg--ok">{backupMessage}</p>
         ) : null}
       </section>
 
-      <section className="glass-panel space-y-3 rounded-2xl p-4">
+      <section className="settings-section space-y-3">
         <h3 className="font-semibold">Import ratings (optional)</h3>
         <p className="text-sm text-muted">
           IMDb CSV import still boosts recommendations — not required to start swiping.
         </p>
-        <Link
-          href="/import"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl app-btn-secondary py-2.5 text-sm font-medium"
-        >
-          <span aria-hidden>📥</span>
+        <Link href="/import" className="settings-btn">
+          <FileUp className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
           Import IMDb CSV
         </Link>
       </section>
 
-      <section className="glass-panel space-y-4 rounded-2xl p-4">
+      <section className="settings-section">
         <ThemeSwitcher />
       </section>
 
       {appStatus ? (
-        <div className="glass-panel rounded-2xl p-4 text-sm text-muted">
+        <div className="settings-section text-sm text-muted">
           <p>{appStatus.importedCount} ratings imported</p>
           <p>Taste profile: {appStatus.hasProfile ? "Ready" : "Not built yet"}</p>
           <p>API keys: {appStatus.keysReady ? "Configured" : "Missing"}</p>
@@ -340,7 +340,6 @@ export default function SettingsPage() {
           ) : null}
         </div>
       ) : null}
-
     </div>
   );
 }

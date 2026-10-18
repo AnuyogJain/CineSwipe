@@ -35,9 +35,9 @@ export function HomeMovieRow({
     <section className="mb-7">
       <SectionHeader title={title} viewAllHref={viewAllHref} />
       {preview.length === 0 ? (
-        <p className="px-4 text-sm text-subtle">{emptyHint}</p>
+        <p className="text-sm text-subtle">{emptyHint}</p>
       ) : (
-        <div className="row-edge-fade scrollbar-hide flex gap-3 overflow-x-auto overflow-y-hidden px-4 pb-1 snap-x snap-mandatory">
+        <div className="row-edge-fade scrollbar-hide flex gap-3 overflow-x-auto overflow-y-hidden pb-1 snap-x snap-mandatory">
           {preview.map((movie) => (
             <PosterCard
               key={movie.tmdbId}

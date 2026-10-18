@@ -26,7 +26,7 @@ export function PosterCard({
       type="button"
       onClick={onClick}
       disabled={!interactive}
-      className={`poster-card group w-[29vw] max-w-[132px] shrink-0 snap-start text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cinema-gold)] disabled:cursor-default ${className}`}
+      className={`poster-card group w-[29vw] max-w-[132px] shrink-0 snap-start text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cinema-gold)] ${interactive ? "cursor-pointer" : "cursor-default"} ${className}`}
     >
       <div className="relative aspect-[2/3] w-full">
         {imageSrc ? (

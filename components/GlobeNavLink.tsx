@@ -10,7 +10,7 @@ export function GlobeNavLink({ source }: GlobeNavLinkProps) {
   return (
     <Link
       href={`/globe?source=${source}`}
-      className="flex shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-surface px-3 py-2 transition hover:bg-white/10"
+      className="toolbar-chip"
       aria-label="View on globe"
       title="Globe"
     >

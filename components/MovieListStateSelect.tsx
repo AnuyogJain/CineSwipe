@@ -23,6 +23,7 @@ export function MovieListStateSelect({
     <SingleSelectDropdown
       label=""
       compact
+      menuPlacement="up"
       options={MOVIE_LIST_STATE_OPTIONS}
       value={value}
       disabled={disabled}

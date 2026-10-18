@@ -6,6 +6,7 @@ export {
   Clapperboard,
   ExternalLink,
   Eye,
+  FileUp,
   Film,
   Globe,
   Heart,

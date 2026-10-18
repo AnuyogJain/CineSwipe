@@ -19,7 +19,7 @@ export function CastRow({ cast, activeCastId, onSelect }: CastRowProps) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-medium uppercase tracking-wider text-white/40">
+      <p className="text-xs font-medium uppercase tracking-wider text-subtle">
         Cast · tap to filter
       </p>
       <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
@@ -31,13 +31,11 @@ export function CastRow({ cast, activeCastId, onSelect }: CastRowProps) {
               e.stopPropagation();
               onSelect?.(member);
             }}
-            className={`flex min-w-[76px] flex-col items-center gap-1 rounded-xl p-1 text-center transition ${
-              activeCastId === member.id
-                ? "bg-violet-500/20 ring-1 ring-violet-400/50"
-                : "hover:bg-white/5"
+            className={`cast-row-member flex min-w-[76px] flex-col items-center gap-1 rounded-xl p-1.5 text-center transition ${
+              activeCastId === member.id ? "cast-row-member--active" : ""
             }`}
           >
-            <div className="relative h-16 w-16 overflow-hidden rounded-full bg-white/10 ring-2 ring-white/10">
+            <div className="cast-row-member__avatar relative h-16 w-16 overflow-hidden rounded-full bg-[var(--surface-hover)]">
               {member.profilePath ? (
                 <Image
                   src={posterUrl(member.profilePath, "w185")!}
@@ -47,15 +45,15 @@ export function CastRow({ cast, activeCastId, onSelect }: CastRowProps) {
                   sizes="64px"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-lg text-white/40">
+                <div className="flex h-full w-full items-center justify-center text-lg text-subtle">
                   ?
                 </div>
               )}
             </div>
-            <span className="line-clamp-2 text-[10px] font-medium text-white/80">
+            <span className="line-clamp-2 text-[10px] font-medium text-foreground">
               {member.name}
             </span>
-            <span className="line-clamp-1 text-[9px] text-white/40">{member.character}</span>
+            <span className="line-clamp-1 text-[9px] text-subtle">{member.character}</span>
           </button>
         ))}
       </div>

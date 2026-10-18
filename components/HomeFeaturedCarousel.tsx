@@ -102,7 +102,7 @@ export function HomeFeaturedCarousel({
                     key={movie.tmdbId}
                     type="button"
                     onClick={() => onSelectMovie(movie)}
-                    className="relative min-w-0 flex-[0_0_100%] text-left"
+                    className="relative min-w-0 flex-[0_0_100%] cursor-pointer text-left"
                   >
                     <div className="relative aspect-[16/10] w-full sm:aspect-[2/1]">
                       {src ? (

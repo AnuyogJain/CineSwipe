@@ -24,7 +24,7 @@ export function GlassButton({
   type = "button",
   ...props
 }: GlassButtonProps) {
-  const classes = `inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${variants[variant]} ${className}`;
+  const classes = `ui-btn ui-btn--${variant} inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${variants[variant]} ${className}`;
 
   if (href) {
     return (

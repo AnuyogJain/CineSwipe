@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { MinimalLoader } from "./MinimalLoader";
+import { useTheme } from "./ThemeProvider";
 
 interface LoadingProgressProps {
   active: boolean;
@@ -10,6 +12,7 @@ interface LoadingProgressProps {
 }
 
 export function LoadingProgress({ active, label, compact = false }: LoadingProgressProps) {
+  const { isMinimal, hydrated } = useTheme();
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
@@ -29,6 +32,18 @@ export function LoadingProgress({ active, label, compact = false }: LoadingProgr
 
     return () => window.clearInterval(interval);
   }, [active]);
+
+  if (hydrated && isMinimal) {
+    return (
+      <div className="flex w-full max-w-sm justify-center px-4">
+        <MinimalLoader
+          label={label}
+          compact={compact}
+          progress={active ? display : 0}
+        />
+      </div>
+    );
+  }
 
   if (compact) {
     return (

@@ -66,9 +66,12 @@ export function ListFilterMenu({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
-    document.addEventListener("pointerdown", onPointerDown);
+    const timer = window.setTimeout(() => {
+      document.addEventListener("pointerdown", onPointerDown);
+    }, 0);
     document.addEventListener("keydown", onKey);
     return () => {
+      window.clearTimeout(timer);
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKey);
     };
@@ -129,12 +132,17 @@ export function ListFilterMenu({
         aria-expanded={open}
         aria-controls={panelId}
         aria-label="Filter"
-        title="Filter"
-        onClick={() => setOpen((v) => !v)}
-        className={`flex items-center justify-center rounded-xl border px-3 py-2 transition hover:bg-white/10 disabled:opacity-50 ${
-          active
-            ? "border-rose-400/40 bg-rose-500/15 ring-1 ring-rose-400/30"
-            : "border-white/10 bg-surface"
+        title={
+          disabled
+            ? "Clear the actor filter to change genres and countries"
+            : "Filter"
+        }
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        className={`toolbar-chip disabled:opacity-50 ${
+          active ? "toolbar-chip--active" : ""
         }`}
       >
         <SlidersHorizontal
@@ -147,7 +155,7 @@ export function ListFilterMenu({
       {open ? (
         <div
           id={panelId}
-          className={`glass-panel absolute ${panelAlignClass} top-full z-50 mt-2 w-[min(calc(100vw-2rem),18rem)] rounded-2xl p-3`}
+          className={`filter-menu-panel glass-panel absolute ${panelAlignClass} top-full z-[120] mt-2 w-[min(calc(100vw-2rem),18rem)] rounded-2xl p-3`}
         >
           <div className="mb-2 flex items-center justify-between gap-2">
             {active ? (
@@ -195,7 +203,7 @@ export function ListFilterMenu({
             />
           </div>
           {showTasteHint ? (
-            <p className="mt-2 px-0.5 text-[10px] text-white/30">
+            <p className="mt-2 px-0.5 text-[10px] text-subtle">
               Amber genres match your taste profile
             </p>
           ) : null}

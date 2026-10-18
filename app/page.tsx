@@ -6,6 +6,7 @@ import { HomeMovieRow } from "@/components/HomeMovieRow";
 import { MovieDetailPanel } from "@/components/MovieDetailPanel";
 import type { MovieCandidate } from "@/lib/types";
 import { HomeDiscoverHero } from "@/components/HomeDiscoverHero";
+import { LoadingProgress } from "@/components/LoadingProgress";
 
 export default function HomePage() {
   const [liked, setLiked] = useState<MovieCandidate[]>([]);
@@ -59,7 +60,7 @@ export default function HomePage() {
   }, [load]);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-4 scrollbar-hide">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4 scrollbar-hide">
       <div className="pt-3">
         <HomeDiscoverHero
           keysReady={setup.keysReady}
@@ -69,7 +70,9 @@ export default function HomePage() {
       </div>
 
       {loading ? (
-        <p className="mt-6 px-4 text-sm text-white/45">Loading your lists…</p>
+        <div className="mt-8 flex justify-center">
+          <LoadingProgress active label="Loading your lists…" compact />
+        </div>
       ) : (
         <div className="mt-6">
           <HomeMovieRow

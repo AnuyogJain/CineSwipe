@@ -41,10 +41,14 @@ function DiscoverDeckShell({
   children: ReactNode;
 }) {
   return (
-    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-2 overflow-hidden pb-2 pt-2">
-      {overlay}
-      {toolbar}
-      {children}
+    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-2 pb-2 pt-2">
+      {toolbar ? (
+        <div className="discover-toolbar-slot relative z-40 shrink-0">{toolbar}</div>
+      ) : null}
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+        {overlay}
+        {children}
+      </div>
     </div>
   );
 }
@@ -457,15 +461,18 @@ export function SwipeDeck({
     advance();
   };
 
-  const discoverToolbar = setup?.keysReady ? (
-    <div className="relative z-30 flex shrink-0 items-start gap-2">
+  const statusPending = setup === null;
+  const showDiscoverToolbar = statusPending || setup?.keysReady === true;
+
+  const discoverToolbar = showDiscoverToolbar ? (
+    <div className="discover-toolbar-row shrink-0">
       <CastSearchField
         selected={castFilter}
         onSelect={applyCastFilter}
         onClear={() => setCastFilter(null)}
-        disabled={busy || loading}
+        disabled={busy || loading || statusPending}
       />
-      <div className="ml-auto flex shrink-0 items-start gap-2">
+      <div className="ml-auto flex shrink-0 items-center gap-2">
         <ListFilterMenu
           filters={{
             genres: genreFilters,
@@ -478,7 +485,7 @@ export function SwipeDeck({
           countryLabel={
             lockCountries ? countryLabel ?? countryFilters[0] ?? null : null
           }
-          disabled={busy || loading || Boolean(castFilter)}
+          disabled={busy || loading || statusPending || Boolean(castFilter)}
           dropdownAlign="right"
           showTasteHint={topGenres.length > 0 && !castFilter}
         />
@@ -487,16 +494,16 @@ export function SwipeDeck({
     </div>
   ) : null;
 
-  if (!setup || (loading && movies.length === 0)) {
+  if (statusPending || (loading && movies.length === 0)) {
     const label =
       hasFilters || lockCountries
         ? "Applying filters & loading picks…"
         : "Finding movies matched to your taste…";
 
-    if (setup?.keysReady) {
+    if (showDiscoverToolbar) {
       return (
         <DiscoverDeckShell toolbar={discoverToolbar}>
-          <div className="flex flex-1 items-center justify-center p-8">
+          <div className="flex h-full min-h-0 w-full flex-1 items-center justify-center p-8">
             <LoadingProgress active label={label} />
           </div>
         </DiscoverDeckShell>
@@ -504,16 +511,16 @@ export function SwipeDeck({
     }
 
     return (
-      <div className="flex flex-1 items-center justify-center p-8">
+      <div className="flex h-full min-h-0 w-full flex-1 items-center justify-center p-8">
         <LoadingProgress active label={label} />
       </div>
     );
   }
 
-  if (!setup.keysReady) {
+  if (!setup!.keysReady) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-        <p className="text-lg font-semibold text-white">
+        <p className="text-lg font-semibold text-foreground">
           Add your API keys first
         </p>
         <Link
@@ -531,10 +538,10 @@ export function SwipeDeck({
     return (
       <DiscoverDeckShell toolbar={discoverToolbar}>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-          <p className="text-lg font-semibold text-white">
+          <p className="text-lg font-semibold text-foreground">
             Couldn&apos;t load picks
           </p>
-          <p className="max-w-sm text-sm text-white/70">{error}</p>
+          <p className="max-w-sm text-sm text-muted">{error}</p>
           <div className="flex flex-wrap justify-center gap-2">
             {showSettings ? (
               <Link
@@ -548,7 +555,7 @@ export function SwipeDeck({
               <button
                 type="button"
                 onClick={clearFilters}
-                className="rounded-full bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15"
+                className="rounded-full border border-border bg-surface px-4 py-2 text-sm text-muted hover:bg-[var(--surface-hover)]"
               >
                 Clear filters
               </button>
@@ -556,7 +563,7 @@ export function SwipeDeck({
             <button
               type="button"
               onClick={refreshDeck}
-              className="rounded-full bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15"
+              className="rounded-full border border-border bg-surface px-4 py-2 text-sm text-muted hover:bg-[var(--surface-hover)]"
             >
               Retry
             </button>
@@ -570,8 +577,8 @@ export function SwipeDeck({
     return (
       <DiscoverDeckShell toolbar={discoverToolbar}>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-          <p className="text-white/70">No more picks in this batch.</p>
-          <p className="max-w-xs text-sm text-white/45">
+          <p className="text-muted">No more picks in this batch.</p>
+          <p className="max-w-xs text-sm text-subtle">
             {lockCountries
               ? `Load more recommendations from ${
                   countryLabel ?? "this country"
@@ -583,7 +590,7 @@ export function SwipeDeck({
               <button
                 type="button"
                 onClick={clearFilters}
-                className="rounded-full bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15"
+                className="rounded-full border border-border bg-surface px-4 py-2 text-sm text-muted hover:bg-[var(--surface-hover)]"
               >
                 Clear filters
               </button>
@@ -607,7 +614,7 @@ export function SwipeDeck({
       toolbar={discoverToolbar}
       overlay={
         loading ? (
-          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/65 backdrop-blur-md">
+          <div className="swipe-deck-loading absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/65 backdrop-blur-md">
             <LoadingProgress active={loading} label="Updating picks…" compact />
           </div>
         ) : null

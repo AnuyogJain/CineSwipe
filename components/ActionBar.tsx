@@ -11,7 +11,7 @@ interface ActionBarProps {
 }
 
 export const actionSideButtonClass =
-  "flex h-12 w-12 items-center justify-center rounded-full bg-zinc-950/75 shadow-lg shadow-black/40 ring-1 backdrop-blur-md transition hover:scale-105 disabled:opacity-40";
+  "action-side-btn flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-surface backdrop-blur-md transition hover:scale-105 hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-40";
 
 export function ActionBar({
   onPass,
@@ -31,7 +31,7 @@ export function ActionBar({
         disabled={disabled}
         onClick={onWishlist}
         aria-label="Add to wishlist"
-        className={`${actionSideButtonClass} text-amber-300 ring-amber-300/40 hover:bg-amber-400/10`}
+        className={`${actionSideButtonClass} action-side-btn--wishlist text-amber-500 hover:bg-amber-500/10`}
       >
         <Star className={iconActionClass} strokeWidth={2} aria-hidden />
       </button>
@@ -41,7 +41,7 @@ export function ActionBar({
           disabled={disabled}
           onClick={onPass}
           aria-label="Pass"
-          className={`${actionSideButtonClass} text-rose-400 ring-rose-400/30 hover:bg-rose-500/10`}
+          className={`${actionSideButtonClass} action-side-btn--pass text-rose-500 hover:bg-rose-500/10`}
         >
           <X className={iconActionClass} strokeWidth={2.5} aria-hidden />
         </button>
@@ -50,7 +50,7 @@ export function ActionBar({
           disabled={disabled}
           onClick={onLike}
           aria-label="Like"
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-500/45 ring-2 ring-rose-400/25 transition hover:scale-105 disabled:opacity-40"
+          className="action-bar-like"
         >
           <Heart
             className="h-7 w-7 shrink-0"
@@ -66,10 +66,10 @@ export function ActionBar({
         onClick={onWatched}
         aria-label={watched ? "Already in watched" : "Mark as watched"}
         title={watched ? "In watched" : "Mark watched"}
-        className={`${actionSideButtonClass} ${
+        className={`${actionSideButtonClass} action-side-btn--watched ${
           watched
-            ? "bg-sky-500/15 text-sky-200 ring-sky-400/40"
-            : "text-sky-300 ring-sky-400/40 hover:bg-sky-400/10"
+            ? "bg-sky-500/15 text-sky-600"
+            : "text-sky-600 hover:bg-sky-500/10"
         }`}
       >
         <Eye className={iconActionClass} strokeWidth={2} aria-hidden />

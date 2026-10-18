@@ -12,6 +12,7 @@ import type { MovieListState } from "@/lib/movie-list-state";
 import type { MovieCandidate } from "@/lib/types";
 
 const TAB_LIST_STATE: MovieListState = "liked";
+import { LoadingProgress } from "@/components/LoadingProgress";
 import { MovieGrid } from "@/components/MovieGrid";
 
 export default function LikedPage() {
@@ -74,8 +75,8 @@ export default function LikedPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center text-white/50">
-        Loading liked movies…
+      <div className="flex flex-1 items-center justify-center p-8">
+        <LoadingProgress active label="Loading liked movies…" compact />
       </div>
     );
   }

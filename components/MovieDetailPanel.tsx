@@ -288,7 +288,7 @@ export function MovieDetailPanel({
             type="button"
             aria-label="Close"
             onClick={onClose}
-            className={`pointer-events-auto ${actionSideButtonClass} text-white/80 ring-white/20 hover:bg-white/10`}
+            className={`pointer-events-auto ${actionSideButtonClass} text-muted`}
           >
             <X className={iconActionClass} strokeWidth={2.5} aria-hidden />
           </button>
@@ -300,7 +300,7 @@ export function MovieDetailPanel({
           </p>
         ) : null}
 
-        <div className="globe-modal__body scrollbar-hide relative min-h-0 flex-1 bg-zinc-950">
+        <div className="globe-modal__body scrollbar-hide relative min-h-0 flex-1 bg-background">
           {loading ? (
             <MovieProfileSkeleton />
           ) : error && !profileMovie ? (
@@ -309,7 +309,7 @@ export function MovieDetailPanel({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full bg-white/10 px-4 py-2 text-sm text-white/80 transition hover:bg-white/15"
+                className="rounded-full border border-border bg-surface px-4 py-2 text-sm text-muted transition hover:bg-[var(--surface-hover)]"
               >
                 Dismiss
               </button>

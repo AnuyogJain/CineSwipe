@@ -26,7 +26,7 @@ export function MovieGrid({
 }: MovieGridProps) {
   if (movies.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center p-8 text-center text-white/50">
+      <div className="flex flex-1 items-center justify-center p-8 text-center text-muted">
         {emptyMessage}
       </div>
     );
@@ -100,7 +100,7 @@ export function MovieGrid({
                   event.stopPropagation();
                   onWishlist?.(movie.tmdbId);
                 }}
-                className="flex w-full items-center justify-center gap-1.5 border-t border-white/5 px-3 py-2 text-xs font-medium text-amber-300 hover:bg-amber-400/10"
+                className="poster-card__footer-action flex w-full items-center justify-center gap-1.5 border-t border-border px-3 py-2.5 text-xs font-semibold text-foreground hover:bg-[var(--surface-hover)]"
               >
                 <Star
                   className="h-3.5 w-3.5 shrink-0"
