@@ -729,53 +729,6 @@
   background: var(--surface-hover);
 }
 
-.home-cinedle-promo {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.625rem;
-  margin-top: 0.75rem;
-  padding: 0.875rem 1rem;
-  border-radius: 1rem;
-  border: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.home-cinedle-promo__icon {
-  display: flex;
-  height: 2.25rem;
-  width: 2.25rem;
-  shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.625rem;
-  border: 1px solid var(--border);
-  background: var(--background);
-  color: var(--foreground);
-}
-
-.home-cinedle-promo__eyebrow {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--foreground-subtle);
-}
-
-.home-cinedle-promo__title {
-  margin-top: 0.125rem;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.35;
-  color: var(--foreground);
-}
-
-.home-cinedle-promo__body {
-  margin-top: 0.25rem;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--foreground-muted);
-}
-
 [data-ui-mode="minimal"] .home-cinedle-promo,
 [data-ui-mode="minimal"] .home-cinedle-promo__icon {
   border-width: 2px;
