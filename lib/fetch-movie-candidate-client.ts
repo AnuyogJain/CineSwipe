@@ -4,7 +4,7 @@ import type { MovieCandidate } from "@/lib/types";
 export async function fetchMovieCandidateByTmdbId(
   tmdbId: number,
 ): Promise<MovieCandidate | null> {
-  const res = await fetch(`/api/movies/${tmdbId}`);
+  const res = await fetch(`/api/movies/${tmdbId}`, { cache: "no-store" });
   if (!res.ok) return null;
   const data = await res.json();
   if (!data?.tmdbId) return null;

@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { sanitizeRelativeNext } from "@/lib/safe-next-path";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/";
+  const next = sanitizeRelativeNext(searchParams.get("next"));
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -25,8 +25,8 @@ function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Login failed");
-      router.replace(next.startsWith("/") ? next : "/");
-      router.refresh();
+      // Full navigation so session cookie + ?tmdbId= deep links apply reliably
+      window.location.assign(next);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

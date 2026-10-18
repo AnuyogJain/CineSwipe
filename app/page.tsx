@@ -71,9 +71,22 @@ function HomePageContent() {
     if (!Number.isFinite(tmdbId) || tmdbId <= 0) return;
 
     let cancelled = false;
-    void fetchMovieCandidateByTmdbId(tmdbId).then((movie) => {
-      if (!cancelled && movie) setSelected(movie);
-    });
+
+    const openFromDeepLink = async () => {
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const movie = await fetchMovieCandidateByTmdbId(tmdbId);
+        if (cancelled) return;
+        if (movie) {
+          setSelected(movie);
+          return;
+        }
+        if (attempt < 2) {
+          await new Promise((r) => setTimeout(r, 150 * (attempt + 1)));
+        }
+      }
+    };
+
+    void openFromDeepLink();
 
     return () => {
       cancelled = true;

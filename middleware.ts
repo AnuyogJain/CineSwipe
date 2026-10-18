@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { SESSION_COOKIE } from "@/lib/auth/constants";
+import { sanitizeRelativeNext } from "@/lib/safe-next-path";
 
 const PUBLIC_PATHS = new Set(["/login", "/register"]);
 
@@ -14,7 +15,9 @@ export function middleware(request: NextRequest) {
 
   if (PUBLIC_PATHS.has(pathname)) {
     if (hasSession) {
-      return NextResponse.redirect(new URL("/", request.url));
+      const nextParam = request.nextUrl.searchParams.get("next");
+      const dest = sanitizeRelativeNext(nextParam);
+      return NextResponse.redirect(new URL(dest, request.url));
     }
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-pathname", pathname);
@@ -27,7 +30,9 @@ export function middleware(request: NextRequest) {
 
   if (!hasSession) {
     const login = new URL("/login", request.url);
-    login.searchParams.set("next", pathname);
+    const returnPath =
+      pathname + (request.nextUrl.search || "");
+    login.searchParams.set("next", returnPath || "/");
     return NextResponse.redirect(login);
   }
 
