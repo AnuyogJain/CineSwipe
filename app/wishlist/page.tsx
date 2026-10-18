@@ -72,8 +72,8 @@ export default function WishlistPage() {
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-hide">
       <div className="flex items-start justify-between gap-3 px-4 pt-4">
         <div className="min-w-0">
-          <h2 className="text-2xl font-bold">Wishlist</h2>
-          <p className="text-sm text-white/50">
+          <h2 className="font-display text-2xl font-bold">Wishlist</h2>
+          <p className="text-sm text-subtle">
             Your wishlisted must-watch picks
           </p>
           {message ? (

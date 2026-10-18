@@ -88,7 +88,7 @@ export function SingleSelectDropdown<T extends string>({
         <div
           id={listId}
           role="listbox"
-          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-y-auto rounded-xl bg-zinc-950/98 py-1 shadow-xl ring-1 ring-white/15 backdrop-blur-xl"
+          className="glass-panel absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-y-auto rounded-2xl py-1"
         >
           {options.map((opt) => {
             const checked = opt.value === value;

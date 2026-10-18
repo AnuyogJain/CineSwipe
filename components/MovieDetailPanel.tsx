@@ -579,7 +579,7 @@ export function MovieDetailPanel({
 
                     <section className="globe-modal__section">
                       <h3 className="globe-modal__section-title">Synopsis</h3>
-                      <p className="text-sm leading-relaxed text-white/75">
+                      <p className="synopsis-fade text-sm leading-relaxed text-white/75">
                         {detail.overview || "No description available."}
                       </p>
                     </section>

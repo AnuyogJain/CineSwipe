@@ -15,7 +15,15 @@ function DiscoverContent() {
       : null;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 opacity-60"
+        aria-hidden
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 40% at 50% 0%, rgb(251 113 133 / 0.08), transparent 50%)",
+        }}
+      />
       <SwipeDeck
         initialGenre={searchParams.get("genre") ?? undefined}
         initialCast={Number.isFinite(initialCast?.id) ? initialCast : null}

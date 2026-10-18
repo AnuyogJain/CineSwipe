@@ -7,10 +7,11 @@ interface ActionBarProps {
   onWatched: () => void;
   watched?: boolean;
   disabled?: boolean;
+  className?: string;
 }
 
-const sideButtonClass =
-  "flex h-12 w-12 items-center justify-center rounded-full bg-white/5 ring-1 transition hover:scale-105 disabled:opacity-40";
+export const actionSideButtonClass =
+  "flex h-12 w-12 items-center justify-center rounded-full bg-zinc-950/75 shadow-lg shadow-black/40 ring-1 backdrop-blur-md transition hover:scale-105 disabled:opacity-40";
 
 export function ActionBar({
   onPass,
@@ -19,15 +20,18 @@ export function ActionBar({
   onWatched,
   watched = false,
   disabled,
+  className = "",
 }: ActionBarProps) {
   return (
-    <div className="flex w-full items-center justify-between gap-3">
+    <div
+      className={`flex w-full items-center justify-between gap-3 ${className}`}
+    >
       <button
         type="button"
         disabled={disabled}
         onClick={onWishlist}
         aria-label="Add to wishlist"
-        className={`${sideButtonClass} text-amber-300 ring-amber-300/40 hover:bg-amber-400/10`}
+        className={`${actionSideButtonClass} text-amber-300 ring-amber-300/40 hover:bg-amber-400/10`}
       >
         <Star className={iconActionClass} strokeWidth={2} aria-hidden />
       </button>
@@ -37,7 +41,7 @@ export function ActionBar({
           disabled={disabled}
           onClick={onPass}
           aria-label="Pass"
-          className={`${sideButtonClass} text-rose-400 ring-rose-400/30 hover:bg-rose-500/10`}
+          className={`${actionSideButtonClass} text-rose-400 ring-rose-400/30 hover:bg-rose-500/10`}
         >
           <X className={iconActionClass} strokeWidth={2.5} aria-hidden />
         </button>
@@ -46,7 +50,7 @@ export function ActionBar({
           disabled={disabled}
           onClick={onLike}
           aria-label="Like"
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-500/30 transition hover:scale-105 disabled:opacity-40"
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-500/45 ring-2 ring-rose-400/25 transition hover:scale-105 disabled:opacity-40"
         >
           <Heart
             className="h-7 w-7 shrink-0"
@@ -62,7 +66,7 @@ export function ActionBar({
         onClick={onWatched}
         aria-label={watched ? "Already in watched" : "Mark as watched"}
         title={watched ? "In watched" : "Mark watched"}
-        className={`${sideButtonClass} ${
+        className={`${actionSideButtonClass} ${
           watched
             ? "bg-sky-500/15 text-sky-200 ring-sky-400/40"
             : "text-sky-300 ring-sky-400/40 hover:bg-sky-400/10"

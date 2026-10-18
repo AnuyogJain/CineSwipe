@@ -41,6 +41,15 @@
   --globe-stats-text: rgb(71 85 105);
   --globe-stats-border: rgb(226 232 240 / 0.8);
   --globe-hint-text: rgb(100 116 139 / 0.8);
+  --hero-scrim: linear-gradient(180deg,
+      rgb(0 0 0 / 0.55) 0%,
+      rgb(0 0 0 / 0.08) 38%,
+      rgb(0 0 0 / 0.92) 100%);
+  --poster-glow: 0 12px 40px rgb(0 0 0 / 0.55);
+  --pill-bg: rgb(255 255 255 / 0.1);
+  --nav-glass: rgb(9 9 11 / 0.72);
+  --cta-glow: 0 0 24px rgb(245 197 24 / 0.22);
+  --cinema-gold: #f5c518;
 }
 
 [data-theme="dark-oled"] {
@@ -79,6 +88,15 @@
   --globe-stats-text: rgb(228 228 231);
   --globe-stats-border: rgb(63 63 70 / 0.8);
   --globe-hint-text: rgb(161 161 170 / 0.85);
+  --hero-scrim: linear-gradient(180deg,
+      rgb(0 0 0 / 0.6) 0%,
+      rgb(0 0 0 / 0.05) 40%,
+      rgb(0 0 0 / 0.95) 100%);
+  --poster-glow: 0 16px 48px rgb(0 0 0 / 0.7);
+  --pill-bg: rgb(255 255 255 / 0.11);
+  --nav-glass: rgb(0 0 0 / 0.78);
+  --cta-glow: 0 0 28px rgb(245 197 24 / 0.18);
+  --cinema-gold: #f5c518;
 }
 
 [data-theme="dark-amethyst"] {
@@ -117,6 +135,15 @@
   --globe-stats-text: rgb(76 29 149);
   --globe-stats-border: rgb(196 181 253 / 0.45);
   --globe-hint-text: rgb(109 40 217 / 0.65);
+  --hero-scrim: linear-gradient(180deg,
+      rgb(20 8 32 / 0.65) 0%,
+      rgb(20 8 32 / 0.1) 38%,
+      rgb(10 4 18 / 0.94) 100%);
+  --poster-glow: 0 12px 44px rgb(46 16 101 / 0.45);
+  --pill-bg: rgb(196 181 253 / 0.12);
+  --nav-glass: rgb(20 8 32 / 0.78);
+  --cta-glow: 0 0 32px rgb(192 132 252 / 0.25);
+  --cinema-gold: #f5c518;
 }
 
 @theme inline {
@@ -133,6 +160,11 @@
   --color-imdb-yellow: var(--imdb-yellow);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-syne);
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-geist-sans), system-ui, sans-serif;
 }
 
 * {
@@ -163,6 +195,128 @@ body {
   display: none;
 }
 
+/* Cinema surfaces */
+.glass-panel {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--nav-glass) 88%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 8px 32px rgb(0 0 0 / 0.35);
+}
+
+.poster-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--card-bg);
+  box-shadow:
+    var(--poster-glow),
+    inset 0 0 0 1px var(--ring);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.poster-card:hover {
+  transform: scale(1.02);
+}
+
+.poster-card__scrim {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+      transparent 45%,
+      rgb(0 0 0 / 0.55) 72%,
+      rgb(0 0 0 / 0.92) 100%);
+}
+
+.movie-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--pill-bg);
+  padding: 0.2rem 0.55rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--foreground-muted);
+  white-space: nowrap;
+}
+
+.movie-pill--gold {
+  border-color: rgb(245 197 24 / 0.35);
+  background: rgb(245 197 24 / 0.12);
+  color: var(--cinema-gold);
+}
+
+.section-title {
+  font-family: var(--font-display), var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--foreground);
+}
+
+.row-edge-fade {
+  position: relative;
+}
+
+.row-edge-fade::after {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2.5rem;
+  background: linear-gradient(90deg, transparent, var(--background));
+}
+
+.hero-backdrop-scrim {
+  background: var(--hero-scrim);
+}
+
+.synopsis-fade {
+  mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+}
+
+.cta-glow {
+  box-shadow: var(--cta-glow);
+}
+
+/* Discover card: gestures hit the card, not TMDB stills */
+.swipe-card-media {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.swipe-stamp {
+  transition: filter 120ms ease;
+}
+
+.swipe-stamp--like {
+  text-shadow: 0 0 18px rgb(52 211 153 / 0.65);
+}
+
+.swipe-stamp--nope {
+  text-shadow: 0 0 18px rgb(251 113 133 / 0.65);
+}
+
+.swipe-card-profile button,
+.swipe-card-profile a,
+.swipe-card-profile input,
+.swipe-card-profile select,
+.swipe-card-profile textarea,
+.swipe-card-profile [role="button"],
+.swipe-card-profile [role="listbox"],
+.swipe-card-profile [role="option"] {
+  pointer-events: auto;
+}
+
 /* App shell */
 .app-header {
   border-color: var(--border-subtle);
@@ -171,9 +325,14 @@ body {
 }
 
 .app-nav {
-  border-color: var(--border-subtle);
-  background: var(--nav-bg);
+  pointer-events: none;
+  border: none;
+  background: transparent;
   color: var(--foreground);
+}
+
+.app-nav__inner {
+  pointer-events: auto;
 }
 
 .app-nav__link {
@@ -186,7 +345,8 @@ body {
 
 .app-nav__link--active {
   background: var(--nav-active);
-  color: var(--accent-text);
+  color: var(--cinema-gold);
+  box-shadow: var(--cta-glow);
 }
 
 .app-panel {
@@ -319,7 +479,7 @@ body {
 
 /* Single intentional scroller: movie card profile */
 .card-scroll {
-  scrollbar-width: thin;
+  scrollbar-width: none;
   scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
@@ -754,7 +914,8 @@ body {
   justify-content: center;
   border-radius: 9999px;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--nav-glass) 90%, transparent);
+  backdrop-filter: blur(12px);
   color: var(--foreground-muted);
   transition: background 150ms, color 150ms;
 }
@@ -772,7 +933,8 @@ body {
 
 .globe-modal__hero {
   position: relative;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 2 / 3;
+  max-height: min(52dvh, 420px);
   width: 100%;
   overflow: hidden;
   background: var(--surface);
@@ -782,10 +944,7 @@ body {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top,
-      var(--globe-panel-bg) 0%,
-      color-mix(in srgb, var(--globe-panel-bg) 35%, transparent) 35%,
-      transparent 100%);
+  background: var(--hero-scrim);
 }
 
 .globe-modal__nav {
@@ -852,9 +1011,11 @@ body {
 }
 
 .globe-modal__title {
-  font-size: 1.375rem;
+  font-family: var(--font-display), var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 1.5rem;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
   color: var(--globe-panel-text);
 }
 
@@ -881,7 +1042,8 @@ body {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  background: var(--pill-bg);
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 500;

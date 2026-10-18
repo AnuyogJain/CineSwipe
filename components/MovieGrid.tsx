@@ -39,11 +39,7 @@ export function MovieGrid({
         return (
           <article
             key={movie.imdbId ?? `tmdb-${movie.tmdbId}`}
-            className={`overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/10${
-              onSelectMovie
-                ? " cursor-pointer transition hover:ring-white/25"
-                : ""
-            }`}
+            className={`poster-card${onSelectMovie ? " cursor-pointer" : ""}`}
           >
             <div
               className="relative aspect-[2/3] w-full"

@@ -108,7 +108,7 @@ export function CastSearchField({
       {open && results.length > 0 ? (
         <ul
           id={listId}
-          className="absolute left-0 top-full z-50 mt-1 max-h-48 w-full min-w-[12rem] overflow-y-auto rounded-xl border border-white/10 bg-zinc-950/98 py-1 shadow-xl backdrop-blur-xl"
+          className="glass-panel absolute left-0 top-full z-50 mt-1 max-h-48 w-full min-w-[12rem] overflow-y-auto rounded-2xl py-1"
         >
           {results.map((person) => (
             <li key={person.id}>

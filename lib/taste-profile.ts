@@ -201,11 +201,17 @@ export async function updateTasteProfileFromSwipe(
     year: number;
     runtime: number | null;
   },
-  action: "pass" | "like" | "wishlist",
+  action: "pass" | "like" | "wishlist" | "revert_pass",
 ): Promise<void> {
   const profile = (await getTasteProfile()) ?? buildTasteProfileFromRatings([]);
   const delta =
-    action === "wishlist" ? 0.25 : action === "like" ? 0.1 : -0.05;
+    action === "wishlist"
+      ? 0.25
+      : action === "like"
+        ? 0.1
+        : action === "revert_pass"
+          ? 0.05
+          : -0.05;
 
   for (const genre of movie.genres) {
     addToMap(profile.genres, genre, delta);

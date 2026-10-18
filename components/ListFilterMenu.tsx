@@ -147,7 +147,7 @@ export function ListFilterMenu({
       {open ? (
         <div
           id={panelId}
-          className={`absolute ${panelAlignClass} top-full z-50 mt-2 w-[min(calc(100vw-2rem),18rem)] rounded-xl border border-white/10 bg-zinc-950/98 p-3 shadow-xl backdrop-blur-xl`}
+          className={`glass-panel absolute ${panelAlignClass} top-full z-50 mt-2 w-[min(calc(100vw-2rem),18rem)] rounded-2xl p-3`}
         >
           <div className="mb-2 flex items-center justify-between gap-2">
             {active ? (

@@ -161,7 +161,7 @@ export default function SettingsPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-4 pb-8">
       <div>
-        <h2 className="text-2xl font-bold">Settings</h2>
+        <h2 className="font-display text-2xl font-bold">Settings</h2>
         <p className="mt-1 text-sm text-muted">
           Your library and API keys are private to your account.
         </p>
@@ -261,7 +261,7 @@ export default function SettingsPage() {
         ) : null}
       </section>
 
-      <section className="app-panel space-y-3 rounded-2xl p-4">
+      <section className="glass-panel space-y-3 rounded-2xl p-4">
         <h3 className="font-semibold">Backup library</h3>
         <p className="text-sm text-muted">
           Export a CineSwipe CSV (likes, passes, wishlist, ratings, taste). Import
@@ -312,7 +312,7 @@ export default function SettingsPage() {
         ) : null}
       </section>
 
-      <section className="app-panel space-y-3 rounded-2xl p-4">
+      <section className="glass-panel space-y-3 rounded-2xl p-4">
         <h3 className="font-semibold">Import ratings (optional)</h3>
         <p className="text-sm text-muted">
           IMDb CSV import still boosts recommendations — not required to start swiping.
@@ -326,12 +326,12 @@ export default function SettingsPage() {
         </Link>
       </section>
 
-      <section className="app-panel space-y-4 rounded-2xl p-4">
+      <section className="glass-panel space-y-4 rounded-2xl p-4">
         <ThemeSwitcher />
       </section>
 
       {appStatus ? (
-        <div className="app-panel rounded-2xl p-4 text-sm text-muted">
+        <div className="glass-panel rounded-2xl p-4 text-sm text-muted">
           <p>{appStatus.importedCount} ratings imported</p>
           <p>Taste profile: {appStatus.hasProfile ? "Ready" : "Not built yet"}</p>
           <p>API keys: {appStatus.keysReady ? "Configured" : "Missing"}</p>

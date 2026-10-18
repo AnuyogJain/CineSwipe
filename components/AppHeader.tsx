@@ -10,11 +10,11 @@ export function AppHeader() {
 
   return (
     <>
-      <header className="app-header z-40 shrink-0 border-b px-4 py-3 backdrop-blur-xl">
+      <header className="app-header relative z-50 shrink-0 border-b border-[var(--border-subtle)] px-4 py-2.5 backdrop-blur-xl">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
-          <h1 className="text-lg font-bold leading-none">
-            <span className="font-normal text-accent-text">Cine</span>
-            Swipe
+          <h1 className="font-display text-xl font-bold leading-none tracking-wide">
+            <span className="text-[var(--cinema-gold)]">Cine</span>
+            <span className="text-foreground">Swipe</span>
           </h1>
           <div className="flex items-center gap-2">
             <button
@@ -22,7 +22,7 @@ export function AppHeader() {
               aria-label="Search movies"
               title="Search movies"
               onClick={() => setSearchOpen(true)}
-              className="flex shrink-0 items-center justify-center rounded-xl border border-white/10 bg-surface px-3 py-2 transition hover:bg-white/10"
+              className="glass-panel flex shrink-0 items-center justify-center rounded-full p-2.5 transition hover:brightness-110"
             >
               <Search className={iconHeaderClass} strokeWidth={2} aria-hidden />
             </button>

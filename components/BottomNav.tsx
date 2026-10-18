@@ -24,8 +24,8 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="app-nav z-50 shrink-0 border-t backdrop-blur-xl">
-      <div className="mx-auto flex max-w-lg items-center justify-around px-1 py-2">
+    <nav className="app-nav z-50 shrink-0 px-3 pb-3 pt-1">
+      <div className="app-nav__inner glass-panel mx-auto flex max-w-lg items-center justify-around rounded-2xl px-1 py-1.5">
         {links.map((link) => {
           const active =
             link.href === "/discover"

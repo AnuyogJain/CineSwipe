@@ -35,15 +35,15 @@ function LoginForm() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
+    <div className="mx-auto flex w-full flex-col gap-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">
-          <span className="font-normal text-accent-text">Cine</span>Swipe
+        <h1 className="font-display text-2xl font-bold">
+          <span className="text-[var(--cinema-gold)]">Cine</span>Swipe
         </h1>
         <p className="mt-2 text-sm text-muted">Sign in to your library</p>
       </div>
 
-      <form onSubmit={submit} className="app-panel space-y-4 rounded-2xl p-4">
+      <form onSubmit={submit} className="space-y-4">
         {error ? <p className="text-sm text-rose-300">{error}</p> : null}
         <div className="space-y-2">
           <label className="text-xs text-subtle" htmlFor="username">

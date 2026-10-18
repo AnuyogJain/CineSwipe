@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { HomeDiscoverHero } from "@/components/HomeDiscoverHero";
+import { HomeFeaturedCarousel } from "@/components/HomeFeaturedCarousel";
 import { HomeMovieRow } from "@/components/HomeMovieRow";
 import { MovieDetailPanel } from "@/components/MovieDetailPanel";
 import type { MovieCandidate } from "@/lib/types";
+import { HomeDiscoverHero } from "@/components/HomeDiscoverHero";
 
 export default function HomePage() {
   const [liked, setLiked] = useState<MovieCandidate[]>([]);

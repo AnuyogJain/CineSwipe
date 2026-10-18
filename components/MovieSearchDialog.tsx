@@ -84,7 +84,7 @@ export function MovieSearchDialog({ open, onClose }: MovieSearchDialogProps) {
               role="dialog"
               aria-modal="true"
               aria-label="Search movies"
-              className="fixed inset-x-0 top-[57px] z-[61] mx-auto flex max-h-[calc(100dvh-57px-3.5rem)] w-full max-w-lg flex-col border-b border-white/10 bg-zinc-950/98 shadow-2xl backdrop-blur-xl"
+              className="glass-panel fixed inset-x-0 top-[57px] z-[61] mx-auto flex max-h-[calc(100dvh-57px-3.5rem)] w-full max-w-lg flex-col rounded-b-3xl border-t-0"
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}

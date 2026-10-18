@@ -51,7 +51,7 @@ export function UserMenu() {
         aria-controls={listId}
         aria-label="Account menu"
         onClick={() => setOpen((v) => !v)}
-        className="flex shrink-0 items-center justify-center gap-1 rounded-xl border border-white/10 bg-surface px-3 py-2 transition hover:bg-white/10"
+        className="glass-panel flex shrink-0 items-center justify-center gap-1 rounded-full px-3 py-2 transition hover:brightness-110"
       >
         <User className={iconHeaderClass} strokeWidth={2} aria-hidden />
         {open ? (
@@ -65,7 +65,7 @@ export function UserMenu() {
         <div
           id={listId}
           role="menu"
-          className="absolute right-0 top-full z-50 mt-1 min-w-[11rem] overflow-hidden rounded-xl bg-zinc-950/98 py-1 shadow-xl ring-1 ring-white/15 backdrop-blur-xl"
+          className="absolute right-0 top-full z-[60] mt-1 min-w-[11rem] overflow-hidden rounded-xl bg-zinc-950 py-1 shadow-xl ring-1 ring-white/15 backdrop-blur-xl"
         >
           <p className="truncate px-3 py-2 text-xs font-medium text-white/90">
             {displayName ?? "Account"}

@@ -14,6 +14,7 @@ export {
   Settings,
   SlidersHorizontal,
   Star,
+  Undo2,
   User,
   X,
 } from "lucide-react";

@@ -37,7 +37,7 @@ export function GlobeRecommendPanel({ country, onClose }: GlobeRecommendPanelPro
             role="dialog"
             aria-modal="true"
             aria-label={`Discover movies from ${country.name}`}
-            className="globe-recommend-deck theme-keep-dark fixed inset-x-0 top-[57px] bottom-14 z-50 mx-auto flex max-w-lg flex-col overflow-hidden border-x border-white/10 bg-zinc-950 shadow-2xl"
+            className="globe-recommend-deck theme-keep-dark glass-panel fixed inset-x-0 top-[57px] bottom-14 z-50 mx-auto flex max-w-lg flex-col overflow-hidden rounded-none border-x-0 shadow-2xl"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}

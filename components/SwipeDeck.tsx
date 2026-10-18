@@ -24,6 +24,11 @@ import {
 import { markMovieWatched } from "@/lib/mark-watched-client";
 import { LoadingProgress } from "./LoadingProgress";
 
+type UndoPassState = {
+  movie: MovieCandidate;
+  passedIndex: number;
+};
+
 const RECOMMENDATIONS_CLIENT_TIMEOUT_MS = 55_000;
 
 function DiscoverDeckShell({
@@ -36,7 +41,7 @@ function DiscoverDeckShell({
   children: ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-3 pb-2 pt-2">
+    <div className="relative flex min-h-0 flex-1 flex-col gap-2 overflow-hidden pb-2 pt-2">
       {overlay}
       {toolbar}
       {children}
@@ -91,6 +96,7 @@ export function SwipeDeck({
   const requestIdRef = useRef(0);
   /** Prevents double-submit on the same card before React re-renders. */
   const swipeLockTmdbRef = useRef<number | null>(null);
+  const [undoPass, setUndoPass] = useState<UndoPassState | null>(null);
 
   useEffect(() => {
     fetch("/api/status")
@@ -207,6 +213,7 @@ export function SwipeDeck({
         } else {
           setMovies(fresh);
           setIndex(0);
+          setUndoPass(null);
         }
 
         // Weak batch while swiping — pull another Discover window in the same chain.
@@ -348,8 +355,47 @@ export function SwipeDeck({
   ) => {
     if (swipeLockTmdbRef.current === movie.tmdbId) return;
     swipeLockTmdbRef.current = movie.tmdbId;
+    const passedIndex = index;
     advance();
     recordSwipe(action, movie);
+    if (action === "pass") {
+      setUndoPass({ movie, passedIndex });
+    } else {
+      setUndoPass(null);
+    }
+  };
+
+  const canUndoPass =
+    undoPass != null &&
+    index === undoPass.passedIndex + 1 &&
+    movies[undoPass.passedIndex]?.tmdbId === undoPass.movie.tmdbId;
+
+  const handleUndoPass = async () => {
+    if (!undoPass || !canUndoPass || busy || loading) return;
+    setBusy(true);
+    try {
+      const m = undoPass.movie;
+      const res = await fetch("/api/swipe/undo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          movie: {
+            tmdbId: m.tmdbId,
+            genres: m.genres,
+            director: m.director,
+            cast: m.cast,
+            year: m.year,
+            runtime: m.runtime,
+          },
+        }),
+      });
+      if (!res.ok) return;
+      setIndex(undoPass.passedIndex);
+      setUndoPass(null);
+      swipeLockTmdbRef.current = null;
+    } finally {
+      setBusy(false);
+    }
   };
 
   useEffect(() => {
@@ -378,9 +424,7 @@ export function SwipeDeck({
     const params = new URLSearchParams();
     if (current.imdbId) params.set("imdbId", current.imdbId);
     const qs = params.toString();
-    void fetch(
-      `/api/movies/${tmdbId}/library${qs ? `?${qs}` : ""}`,
-    )
+    void fetch(`/api/movies/${tmdbId}/library${qs ? `?${qs}` : ""}`)
       .then((r) => r.json())
       .then((data: { inWatchedLibrary?: boolean }) => {
         if (cancelled || !data.inWatchedLibrary) return;
@@ -406,39 +450,39 @@ export function SwipeDeck({
     } finally {
       setBusy(false);
     }
+    setUndoPass(null);
     advance();
   };
 
-  const discoverToolbar =
-    setup?.keysReady ? (
-      <div className="relative z-30 flex shrink-0 items-start gap-2">
-        <CastSearchField
-          selected={castFilter}
-          onSelect={applyCastFilter}
-          onClear={() => setCastFilter(null)}
-          disabled={busy || loading}
+  const discoverToolbar = setup?.keysReady ? (
+    <div className="relative z-30 flex shrink-0 items-start gap-2">
+      <CastSearchField
+        selected={castFilter}
+        onSelect={applyCastFilter}
+        onClear={() => setCastFilter(null)}
+        disabled={busy || loading}
+      />
+      <div className="ml-auto flex shrink-0 items-start gap-2">
+        <ListFilterMenu
+          filters={{
+            genres: genreFilters,
+            languages: originFilters,
+            countries: countryFilters,
+          }}
+          onChange={onDiscoverFiltersChange}
+          highlightGenres={topGenres}
+          lockCountries={lockCountries}
+          countryLabel={
+            lockCountries ? countryLabel ?? countryFilters[0] ?? null : null
+          }
+          disabled={busy || loading || Boolean(castFilter)}
+          dropdownAlign="right"
+          showTasteHint={topGenres.length > 0 && !castFilter}
         />
-        <div className="ml-auto flex shrink-0 items-start gap-2">
-          <ListFilterMenu
-            filters={{
-              genres: genreFilters,
-              languages: originFilters,
-              countries: countryFilters,
-            }}
-            onChange={onDiscoverFiltersChange}
-            highlightGenres={topGenres}
-            lockCountries={lockCountries}
-            countryLabel={
-              lockCountries ? countryLabel ?? countryFilters[0] ?? null : null
-            }
-            disabled={busy || loading || Boolean(castFilter)}
-            dropdownAlign="right"
-            showTasteHint={topGenres.length > 0 && !castFilter}
-          />
-          {showGlobeNavLink ? <GlobeNavLink source="recommend" /> : null}
-        </div>
+        {showGlobeNavLink ? <GlobeNavLink source="recommend" /> : null}
       </div>
-    ) : null;
+    </div>
+  ) : null;
 
   if (!setup || (loading && movies.length === 0)) {
     const label =
@@ -560,7 +604,7 @@ export function SwipeDeck({
       toolbar={discoverToolbar}
       overlay={
         loading ? (
-          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/50 backdrop-blur-sm">
+          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/65 backdrop-blur-md">
             <LoadingProgress active={loading} label="Updating picks…" compact />
           </div>
         ) : null
@@ -584,6 +628,8 @@ export function SwipeDeck({
             activeGenres={genreFilters}
             activeCastId={castFilter?.id}
             disabled={busy || loading}
+            undoAvailable={canUndoPass}
+            onUndo={() => void handleUndoPass()}
             onSwipe={(dir) => (dir === "right" ? handleLike() : handlePass())}
             onPass={handlePass}
             onLike={handleLike}

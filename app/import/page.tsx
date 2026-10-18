@@ -35,14 +35,14 @@ export default function ImportPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-4">
       <div>
-        <h2 className="text-2xl font-bold">Import IMDb Ratings</h2>
-        <p className="mt-2 text-sm text-white/60">
+        <h2 className="font-display text-2xl font-bold">Import IMDb Ratings</h2>
+        <p className="mt-2 text-sm text-subtle">
           Export your rated titles from IMDb as CSV, then upload here. We&apos;ll
           learn your taste from genres, directors, and your star ratings.
         </p>
       </div>
 
-      <label className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-white/15 bg-white/5 px-6 py-12 text-center transition hover:bg-white/[0.07]">
+      <label className="glass-panel flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-6 py-12 text-center transition hover:brightness-110">
         <span className="text-3xl">📄</span>
         <span className="text-sm font-medium text-white/80">
           {file ? file.name : "Tap to choose CSV file"}
