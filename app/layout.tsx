@@ -26,6 +26,13 @@ export const metadata: Metadata = {
   applicationName: "CineSwipe",
   description: "Discover movies matched to your taste",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

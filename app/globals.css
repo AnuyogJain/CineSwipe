@@ -1624,7 +1624,7 @@ a.imdb-rating-badge__anchor:hover .imdb-rating-badge--interactive {
 
 /* App shell */
 :root {
-  --app-shell-header-height: 3.5625rem;
+  --app-shell-header-height: 2.5rem;
   --app-shell-bottom-nav-height: 5rem;
   --z-app-chrome: 80;
   --z-globe-recommend-scrim: 54;

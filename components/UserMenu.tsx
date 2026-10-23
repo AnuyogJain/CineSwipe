@@ -51,13 +51,13 @@ export function UserMenu() {
         aria-controls={listId}
         aria-label="Account menu"
         onClick={() => setOpen((v) => !v)}
-        className="header-icon-btn glass-panel h-10 gap-1 px-3 py-0 hover:bg-[var(--surface-hover)]"
+        className="header-icon-btn glass-panel h-8 gap-1 px-2.5 py-0 hover:bg-[var(--surface-hover)]"
       >
-        <User className={iconHeaderClass} strokeWidth={2} aria-hidden />
+        <User className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
         {open ? (
-          <ChevronUp className="h-3.5 w-3.5 text-muted" aria-hidden />
+          <ChevronUp className="h-3 w-3 text-muted" aria-hidden />
         ) : (
-          <ChevronDown className="h-3.5 w-3.5 text-muted" aria-hidden />
+          <ChevronDown className="h-3 w-3 text-muted" aria-hidden />
         )}
       </button>
 
