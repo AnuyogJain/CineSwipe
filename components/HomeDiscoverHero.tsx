@@ -49,7 +49,7 @@ export function HomeDiscoverHero({
         <div className="home-discover-hero__copy min-w-0 flex-1">
           <p className="home-discover-hero__eyebrow">Discover &amp; Globe</p>
           <h2 className="home-discover-hero__title">
-            Find films and see them on the map
+            Find films and see them on the globe
           </h2>
           <p className="home-discover-hero__body">{subtitle}</p>
         </div>
