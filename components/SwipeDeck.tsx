@@ -250,8 +250,8 @@ export function SwipeDeck({
             err instanceof TimeoutError
               ? "Loading took too long. Check your API keys in Settings or tap Retry."
               : err instanceof Error
-              ? err.message
-              : "Failed to load movies";
+                ? err.message
+                : "Failed to load movies";
           setError(message);
           setMovies([]);
         }
@@ -491,7 +491,7 @@ export function SwipeDeck({
           dropdownAlign="right"
           showTasteHint={topGenres.length > 0 && !castFilter}
         />
-        {showGlobeNavLink ? <GlobeNavLink source="recommend" /> : null}
+        {showGlobeNavLink ? <GlobeNavLink source="discover" /> : null}
       </div>
     </div>
   ) : null;
@@ -582,9 +582,8 @@ export function SwipeDeck({
           <p className="text-muted">No more picks in this batch.</p>
           <p className="max-w-xs text-sm text-subtle">
             {lockCountries
-              ? `Load more recommendations from ${
-                  countryLabel ?? "this country"
-                }, or go back to the map.`
+              ? `Load more recommendations from ${countryLabel ?? "this country"
+              }, or go back to the map.`
               : "Load the next page of recommendations, or clear filters to browse all tastes."}
           </p>
           <div className="flex flex-wrap justify-center gap-2">
@@ -626,9 +625,8 @@ export function SwipeDeck({
         <motion.div
           key={`${current.tmdbId}-${genreFilters.join(
             "|"
-          )}-${originFilters.join("|")}-${countryFilters.join("|")}-${
-            castFilter?.id ?? ""
-          }`}
+          )}-${originFilters.join("|")}-${countryFilters.join("|")}-${castFilter?.id ?? ""
+            }`}
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.96 }}

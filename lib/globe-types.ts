@@ -1,4 +1,4 @@
-export type GlobeSource = "viewed" | "liked" | "wishlist" | "recommend";
+export type GlobeSource = "viewed" | "liked" | "wishlist" | "recommend" | "discover";
 
 export function parseGlobeSource(value: string | null): GlobeSource {
   if (value === "discover" || value === "recommend") {

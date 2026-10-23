@@ -63,7 +63,7 @@ export function HomeDiscoverHero({
           <ChevronRight className="shrink-0 opacity-90" aria-hidden />
         </Link>
         <Link
-          href="/globe?source=viewed"
+          href="/globe?source=discover"
           className="home-discover-hero__cta home-discover-hero__cta--secondary"
         >
           <span className="home-discover-hero__cta-label">Open globe</span>

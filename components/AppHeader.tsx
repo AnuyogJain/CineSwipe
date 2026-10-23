@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Film, Search, iconHeaderClass } from "@/components/icons";
 import { CinedleAboutDialog } from "./CinedleAboutDialog";
@@ -19,8 +20,14 @@ export function AppHeader({ cinedleAppUrl }: AppHeaderProps) {
       <header className="app-header shrink-0 border-b border-border bg-[var(--header-bg)] px-4 py-2.5 backdrop-blur-xl">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
           <h1 className="font-display text-xl font-bold leading-none tracking-wide">
-            <span className="text-[var(--cinema-gold)]">Cine</span>
-            <span className="text-foreground">Swipe</span>
+            <Link
+              href="/"
+              className="inline-flex items-center transition-opacity hover:opacity-90"
+              aria-label="CineSwipe Home"
+            >
+              <span className="text-[var(--cinema-gold)]">Cine</span>
+              <span className="text-foreground">Swipe</span>
+            </Link>
           </h1>
           <div className="flex items-center gap-2">
             <button
