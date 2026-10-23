@@ -1,15 +1,19 @@
 export type GlobeSource = "viewed" | "liked" | "wishlist" | "recommend";
 
 export function parseGlobeSource(value: string | null): GlobeSource {
-  if (
-    value === "liked" ||
-    value === "wishlist" ||
-    value === "viewed" ||
-    value === "recommend"
-  ) {
-    return value;
+  if (value === "discover" || value === "recommend") {
+    return "recommend";
   }
-  return "viewed";
+  if (value === "liked") {
+    return "liked";
+  }
+  if (value === "wishlist") {
+    return "wishlist";
+  }
+  if (value === "watched" || value === "viewed") {
+    return "viewed";
+  }
+  return "recommend";
 }
 
 export interface GlobeCountry {

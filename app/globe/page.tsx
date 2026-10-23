@@ -31,10 +31,9 @@ const SOURCES: Array<{
   empty: string;
 }> = [
   {
-    id: "viewed",
-    label: "Viewed",
-    empty:
-      "Mark movies as watched on Discover, or import ratings from Settings.",
+    id: "recommend",
+    label: "Discover",
+    empty: "Add API keys in Settings, then swipe on Discover to build taste.",
   },
   {
     id: "liked",
@@ -47,9 +46,10 @@ const SOURCES: Array<{
     empty: "Super-like movies on Discover to pin them here.",
   },
   {
-    id: "recommend",
-    label: "Recommend",
-    empty: "Add API keys in Settings, then swipe on Discover to build taste.",
+    id: "viewed",
+    label: "Watched",
+    empty:
+      "Mark movies as watched on Discover, or import ratings from Settings.",
   },
 ];
 
@@ -144,7 +144,14 @@ export default function GlobePage() {
             role="tab"
             aria-selected={active}
             disabled={loading && active}
-            onClick={() => setSource(option.id)}
+            onClick={() => {
+              setSource(option.id);
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href);
+                url.searchParams.set("source", option.id);
+                window.history.replaceState(null, "", url.toString());
+              }
+            }}
             className={`globe-source-switcher__btn${
               active ? " globe-source-switcher__btn--active" : ""
             }`}
