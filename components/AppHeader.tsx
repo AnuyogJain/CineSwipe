@@ -26,7 +26,7 @@ export function AppHeader({ cinedleAppUrl }: AppHeaderProps) {
               className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-90"
               aria-label="CineSwipe Home"
             >
-              <CineSwipeLogo size={20} className="shrink-0 rounded-md shadow-sm" />
+              <CineSwipeLogo size={20} className="shrink-0 drop-shadow-sm" />
               <span>
                 <span className="text-[var(--cinema-gold)]">Cine</span>
                 <span className="text-foreground">Swipe</span>

@@ -37,6 +37,11 @@
       <feGaussianBlur stdDeviation="30" result="blur"/>
     </filter>
 
+    <!-- Squircle Clip -->
+    <clipPath id="csSquircleClip">
+      <rect x="0" y="0" width="512" height="512" rx="128"/>
+    </clipPath>
+
     <!-- Clip path for front card -->
     <clipPath id="csFrontClip">
       <rect x="0" y="0" width="224" height="304" rx="38"/>
@@ -48,89 +53,90 @@
     </clipPath>
   </defs>
 
-  <!-- Squircle Base -->
-  <rect x="18" y="18" width="476" height="476" rx="118" fill="url(#csBg)"/>
-  <rect x="18" y="18" width="476" height="476" rx="118" fill="none" stroke="url(#csRim)" stroke-width="6"/>
+  <!-- EVERYTHING clipped inside squircle -->
+  <g clip-path="url(#csSquircleClip)">
+    <rect width="512" height="512" fill="url(#csBg)"/>
 
-  <!-- Cinema Ambient Glows -->
-  <circle cx="280" cy="230" r="140" fill="#F43F5E" opacity="0.28" filter="url(#csGlow)"/>
-  <circle cx="180" cy="290" r="130" fill="#F5C518" opacity="0.22" filter="url(#csGlow)"/>
+    <!-- Cinema Ambient Glows -->
+    <circle cx="280" cy="230" r="140" fill="#F43F5E" opacity="0.28" filter="url(#csGlow)"/>
+    <circle cx="180" cy="290" r="130" fill="#F5C518" opacity="0.22" filter="url(#csGlow)"/>
 
-  <!-- BACK CARD: Tilted Left (Gold Cinema Ticket / Reel Pass) -->
-  <g transform="matrix(0.9659 -0.2588 0.2588 0.9659 -45 82)" filter="url(#csShadow)">
-    <g transform="translate(132 104)">
-      <g clip-path="url(#csBackClip)">
-        <!-- Rich dark gold body -->
-        <rect x="0" y="0" width="224" height="304" fill="#241B08"/>
-        
-        <!-- Film Sprocket notches -->
-        <g fill="#F5C518" opacity="0.95">
-          <rect x="14" y="38" width="16" height="26" rx="6"/>
-          <rect x="14" y="86" width="16" height="26" rx="6"/>
-          <rect x="14" y="134" width="16" height="26" rx="6"/>
-          <rect x="14" y="182" width="16" height="26" rx="6"/>
-          <rect x="14" y="230" width="16" height="26" rx="6"/>
+    <!-- BACK CARD: Tilted Left (Gold Cinema Ticket / Reel Pass) -->
+    <g transform="matrix(0.9659 -0.2588 0.2588 0.9659 -45 82)" filter="url(#csShadow)">
+      <g transform="translate(132 104)">
+        <g clip-path="url(#csBackClip)">
+          <!-- Rich dark gold body -->
+          <rect x="0" y="0" width="224" height="304" fill="#241B08"/>
+          
+          <!-- Film Sprocket notches -->
+          <g fill="#F5C518" opacity="0.95">
+            <rect x="14" y="38" width="16" height="26" rx="6"/>
+            <rect x="14" y="86" width="16" height="26" rx="6"/>
+            <rect x="14" y="134" width="16" height="26" rx="6"/>
+            <rect x="14" y="182" width="16" height="26" rx="6"/>
+            <rect x="14" y="230" width="16" height="26" rx="6"/>
+          </g>
+
+          <!-- Inner Film Frame Window -->
+          <rect x="46" y="38" width="158" height="226" rx="22" fill="#171104" stroke="#F5C518" stroke-width="3" stroke-opacity="0.4" stroke-dasharray="8 5"/>
+
+          <!-- Movie Reel / Star Emblem -->
+          <circle cx="125" cy="151" r="38" fill="none" stroke="url(#csGold)" stroke-width="6" opacity="0.8"/>
+          <circle cx="125" cy="151" r="14" fill="url(#csGold)"/>
+          <circle cx="125" cy="123" r="5" fill="#FDE047"/>
+          <circle cx="125" cy="179" r="5" fill="#FDE047"/>
+          <circle cx="97" cy="151" r="5" fill="#FDE047"/>
+          <circle cx="153" cy="151" r="5" fill="#FDE047"/>
         </g>
-
-        <!-- Inner Film Frame Window -->
-        <rect x="46" y="38" width="158" height="226" rx="22" fill="#171104" stroke="#F5C518" stroke-width="3" stroke-opacity="0.4" stroke-dasharray="8 5"/>
-
-        <!-- Movie Reel / Star Emblem -->
-        <circle cx="125" cy="151" r="38" fill="none" stroke="url(#csGold)" stroke-width="6" opacity="0.8"/>
-        <circle cx="125" cy="151" r="14" fill="url(#csGold)"/>
-        <circle cx="125" cy="123" r="5" fill="#FDE047"/>
-        <circle cx="125" cy="179" r="5" fill="#FDE047"/>
-        <circle cx="97" cy="151" r="5" fill="#FDE047"/>
-        <circle cx="153" cy="151" r="5" fill="#FDE047"/>
-      </g>
-      <!-- Gold Outline -->
-      <rect x="0" y="0" width="224" height="304" rx="38" fill="none" stroke="url(#csGold)" stroke-width="8"/>
-    </g>
-  </g>
-
-  <!-- FRONT CARD: Swiping Right (Crimson-Rose Clapperboard) -->
-  <g transform="matrix(0.9781 0.2079 -0.2079 0.9781 58 -40)" filter="url(#csShadow)">
-    <g transform="translate(144 98)">
-      <g clip-path="url(#csFrontClip)">
-        <!-- Card Background -->
-        <rect x="0" y="0" width="224" height="304" fill="url(#csRose)"/>
-
-        <!-- Card Lighting Ambient Circle -->
-        <circle cx="112" cy="190" r="110" fill="#FFFFFF" opacity="0.1"/>
-
-        <!-- Top Clapper Slate Bar -->
-        <rect x="0" y="0" width="224" height="70" fill="#0D0E15"/>
-        <rect x="0" y="68" width="224" height="4" fill="#F5C518" opacity="0.8"/>
-
-        <!-- Bold Chevron Clapper Stripes -->
-        <g fill="#F5C518">
-          <polygon points="28,0 56,0 22,70 -6,70"/>
-          <polygon points="82,0 110,0 76,70 48,70"/>
-          <polygon points="136,0 164,0 130,70 102,70"/>
-          <polygon points="190,0 218,0 184,70 156,70"/>
-          <polygon points="244,0 272,0 238,70 210,70"/>
-        </g>
-      </g>
-
-      <!-- Front Card Subtle Highlight Border -->
-      <rect x="0" y="0" width="224" height="304" rx="38" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-opacity="0.35"/>
-
-      <!-- Center Play & Swipe Action Emblem -->
-      <g transform="translate(112 186)">
-        <!-- Dynamic Swipe Speed Streaks -->
-        <path d="M-64 -22 L-30 -22" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" opacity="0.8"/>
-        <path d="M-76 0 L-26 0" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round" opacity="0.95"/>
-        <path d="M-64 22 L-30 22" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" opacity="0.8"/>
-
-        <!-- Bold White Play Arrow (Swipe Right) -->
-        <path d="M-12 -38 C-12 -41 -8 -43 -5 -41 L54 -4 C57 -2 57 2 54 4 L-5 41 C-8 43 -12 41 -12 38 Z" fill="#FFFFFF"/>
+        <!-- Gold Outline -->
+        <rect x="0" y="0" width="224" height="304" rx="38" fill="none" stroke="url(#csGold)" stroke-width="8"/>
       </g>
     </g>
-  </g>
 
-  <!-- Top-Right Cinema Sparkle -->
-  <g transform="translate(420 88)">
-    <path d="M0 -34 Q0 0 34 0 Q0 0 0 34 Q0 0 -34 0 Q0 0 0 -34 Z" fill="#FFE066"/>
-    <circle cx="0" cy="0" r="6" fill="#FFFFFF"/>
+    <!-- FRONT CARD: Swiping Right (Crimson-Rose Clapperboard) -->
+    <g transform="matrix(0.9781 0.2079 -0.2079 0.9781 58 -40)" filter="url(#csShadow)">
+      <g transform="translate(144 98)">
+        <g clip-path="url(#csFrontClip)">
+          <!-- Card Background -->
+          <rect x="0" y="0" width="224" height="304" fill="url(#csRose)"/>
+
+          <!-- Card Lighting Ambient Circle -->
+          <circle cx="112" cy="190" r="110" fill="#FFFFFF" opacity="0.1"/>
+
+          <!-- Top Clapper Slate Bar -->
+          <rect x="0" y="0" width="224" height="70" fill="#0D0E15"/>
+          <rect x="0" y="68" width="224" height="4" fill="#F5C518" opacity="0.8"/>
+
+          <!-- Bold Chevron Clapper Stripes -->
+          <g fill="#F5C518">
+            <polygon points="28,0 56,0 22,70 -6,70"/>
+            <polygon points="82,0 110,0 76,70 48,70"/>
+            <polygon points="136,0 164,0 130,70 102,70"/>
+            <polygon points="190,0 218,0 184,70 156,70"/>
+            <polygon points="244,0 272,0 238,70 210,70"/>
+          </g>
+        </g>
+
+        <!-- Front Card Subtle Highlight Border -->
+        <rect x="0" y="0" width="224" height="304" rx="38" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-opacity="0.35"/>
+
+        <!-- Center Play & Swipe Action Emblem -->
+        <g transform="translate(112 186)">
+          <path d="M-64 -22 L-30 -22" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" opacity="0.8"/>
+          <path d="M-76 0 L-26 0" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round" opacity="0.95"/>
+          <path d="M-64 22 L-30 22" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" opacity="0.8"/>
+          <path d="M-12 -38 C-12 -41 -8 -43 -5 -41 L54 -4 C57 -2 57 2 54 4 L-5 41 C-8 43 -12 41 -12 38 Z" fill="#FFFFFF"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- Top-Right Cinema Sparkle -->
+    <g transform="translate(420 88)">
+      <path d="M0 -34 Q0 0 34 0 Q0 0 0 34 Q0 0 -34 0 Q0 0 0 -34 Z" fill="#FFE066"/>
+      <circle cx="0" cy="0" r="6" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Outer Rim Stroke -->
+    <rect x="4" y="4" width="504" height="504" rx="124" fill="none" stroke="url(#csRim)" stroke-width="8"/>
   </g>
 </svg>

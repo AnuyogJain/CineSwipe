@@ -17,6 +17,7 @@ export function CineSwipeLogo({
   const glowId = `${idPrefix}-glow`;
   const frontClipId = `${idPrefix}-front-clip`;
   const backClipId = `${idPrefix}-back-clip`;
+  const squircleClipId = `${idPrefix}-squircle-clip`;
 
   return (
     <svg
@@ -66,6 +67,10 @@ export function CineSwipeLogo({
           <feGaussianBlur stdDeviation="30" result="blur" />
         </filter>
 
+        <clipPath id={squircleClipId}>
+          <rect x="0" y="0" width="512" height="512" rx="128" />
+        </clipPath>
+
         <clipPath id={frontClipId}>
           <rect x="0" y="0" width="224" height="304" rx="38" />
         </clipPath>
@@ -75,39 +80,23 @@ export function CineSwipeLogo({
         </clipPath>
       </defs>
 
-      {/* Squircle Base */}
-      <rect
-        x="18"
-        y="18"
-        width="476"
-        height="476"
-        rx="118"
-        fill={`url(#${bgId})`}
-      />
-      <rect
-        x="18"
-        y="18"
-        width="476"
-        height="476"
-        rx="118"
-        fill="none"
-        stroke={`url(#${rimId})`}
-        strokeWidth="6"
-      />
+      {/* EVERYTHING clipped inside squircle to prevent any bleed */}
+      <g clipPath={`url(#${squircleClipId})`}>
+        <rect width="512" height="512" fill={`url(#${bgId})`} />
 
-      {/* Cinema Ambient Glows */}
-      <circle
-        cx="280"
-        cy="230"
-        r="140"
-        fill="#F43F5E"
-        opacity="0.28"
-        filter={`url(#${glowId})`}
-      />
-      <circle
-        cx="180"
-        cy="290"
-        r="130"
+        {/* Cinema Ambient Glows */}
+        <circle
+          cx="280"
+          cy="230"
+          r="140"
+          fill="#F43F5E"
+          opacity="0.28"
+          filter={`url(#${glowId})`}
+        />
+        <circle
+          cx="180"
+          cy="290"
+          r="130"
         fill="#F5C518"
         opacity="0.22"
         filter={`url(#${glowId})`}
@@ -243,6 +232,19 @@ export function CineSwipeLogo({
         />
         <circle cx="0" cy="0" r="6" fill="#FFFFFF" />
       </g>
+
+      {/* Outer Rim Stroke */}
+      <rect
+        x="4"
+        y="4"
+        width="504"
+        height="504"
+        rx="124"
+        fill="none"
+        stroke={`url(#${rimId})`}
+        strokeWidth="8"
+      />
+    </g>
     </svg>
   );
 }
